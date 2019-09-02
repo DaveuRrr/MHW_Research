@@ -1,0 +1,137 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.1 Binary Template
+//
+//      File: 
+//   Authors: Dave uRrr
+//   Version: 1.7
+//   Purpose: Identify Spawned objects in the game of Monster Hunter: World on all sobj files
+//  Category: 
+// File Mask: *.sobj
+//  ID Bytes: 
+//   History: 
+//      January 26, 2019
+//          -Templated was created
+//          -Added support for cSetAnimalArea for the Wedge Beetles
+//          -Added cEmGroupSetter
+//          -Added cPlJumpPos
+//          -Added cFishingFloatSetter
+//          -Added cTerrainPoint
+//          -Added cTraceLogSetter
+//
+//      January 31, 2019
+//          -Added cOTGroupSetter starting template
+//
+//      February 02, 2019
+//          -Added cAssetBasicSetObject template
+//
+//      February 14, 2019
+//          -Added Parameter Functions to cAssetBasicSetObjects
+//          -Updated the cSetAnimalArea for gm_map.sobj
+//
+//      March 02, 2019
+//          -Added cSetPugeeActPoint
+//          -Added cSetPugeeReceivePlPoint
+//          -Added cSetPugeeRunAwayPoint
+//          -Added cSetPugeeSearchItemZone
+//
+//      March 05, 2019
+//          -Updated cVillageNpcSetter
+//
+//      March 14, 2019
+//          -Added cGm012ObjectSetParam
+//
+//      March 15, 2019
+//          -Updated cSetAnimalArea of Configuration and Unkn Struct
+//
+//      March 16, 2019
+//          -Updated cPlJumpPos
+//
+//      March 21, 2019
+//          -Created cEmDesireSetter & cRepopSetter by Material
+//
+//      March 25, 2019
+//          -Updated cTerrinPoint but still needs review
+//          -Created cSetFishArea Template
+//
+//      April 23, 2019
+//          -Updated cSetAnimalArea for Rarity
+//
+//      April 28, 2019
+//          -Updated cTraceLogSetter, contains more Data Types.
+//
+//      April 29, 2019
+//          -Updated information of cEmDesireSetter and cRepopSetter
+//              to the standard template format.
+//
+//      April 30, 2019
+//          -Merged cEmGroupSetter and cEmSetter because they
+//              pretty much are the same template.
+//
+//      May 3, 2019
+//          -Created cOtPosSetter Template
+//
+//      May 5, 2019
+//          -Created cOtRandomSetter Template
+//          -Added Compatability to cOtOtasukeSetter
+//          -Updated cOtGroupSetter
+//------------------------------------------------
+
+//------------------------------------------------
+// Header Information
+typedef struct {
+    long    fType<name="File Type">;
+    if (fType == 6451059) {
+        long    Version;
+        long    sType;
+        long    SOHCnt;
+        char    SOH[SOHCnt];    //Only for Otomos
+    }
+    uint32  ObjCnt<bgcolor=0x0000ff,name="Object Count">;
+} Header;
+
+//------------------------------------------------
+//SOBJL File
+typedef struct {
+    long    SOH<bgcolor=0xff0000,name="Start of Header">;
+    long    ind<bgcolor=0x0000ff,name="Index">;
+    string  cmd<bgcolor=0x800800,name="Command">;
+    string  pat<bgcolor=0x800080,name="Path">;
+    uint32  NUL<name="Null">;
+} rSetObject;
+
+//------------------------------------------------
+//Include cSetObject Templates
+#include "cVillageNpcSetter.bt"
+
+//------------------------------------------------
+// String Information
+string ReadHead(Header& h) {
+    string i;
+    string s;
+    SPrintf(i, "%d", (int)(h.ObjCnt));
+    s = "Obj: " + i;
+    return s;
+}
+
+string Readsobj(rSetObject& r) {
+    string i;
+    SPrintf(i, "%d", (int)(r.ind));
+    string s = "Index: " + i + "\t " + r.pat;
+    return s;
+}
+//------------------------------------------------
+// Result Information
+Header h<bgcolor=0x00ffff,read=ReadHead,name="Header">;
+local int i<hidden=true>;
+local string cType<hidden=true>;
+for (i = 0; i < h.ObjCnt; i++) {
+    if (h.fType == 9) {
+        rSetObject  SOBJ<name="rSetObject",read=Readsobj>;
+    }
+    if (h.fType == 6451059) {
+        FSkip(1);
+        cType = ReadString(FTell());
+        if (cType == "cVillageNpcSetter") {FSkip(-1);       cVillageNpcSetter       cVNS<read=ReadNpc,name="cVillageNpcSetter">;}
+        if (cType == "cQuestNpcSetter") {FSkip(-1);         cVillageNpcSetter      cVNS<read=ReadNpc,name="cQuestNpcSetter">;}
+    }
+}

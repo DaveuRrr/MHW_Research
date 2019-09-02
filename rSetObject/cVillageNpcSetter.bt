@@ -1,0 +1,90 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.1 Binary Template
+//
+//      File: 
+//   Authors: Vuze & Dave uRrr
+//   Version: 
+//   Purpose: Struct class for SOBJ.bt Template
+//  Category: 
+// File Mask: SOBJ.bt
+//  ID Bytes: 
+//   History: 
+//      January 26, 2019
+//          -Templated was created
+//
+//      March 05, 2019
+//          -Updated cVillageNpcSetter
+//          -Also works with cQuestNpcSetter
+//------------------------------------------------
+
+
+//------------------------------------------------
+// cSetObject
+typedef struct {
+    char    SOH0<hidden=true>;
+    char    cType[]<bgcolor=0x000000,name="Command Type">;
+    long    EOT0<hidden=true>;
+    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
+    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
+    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
+    float   Rot_X<bgcolor=0x00ff00,name="Rotation   X">;
+    float   Rot_Y<bgcolor=0x00ff00,name="Rotation   Y">;
+    float   Rot_Z<bgcolor=0x00ff00,name="Rotation   Z">;
+    float   Spn_X<bgcolor=0x00ff00,name="Spawn      X">;
+    float   Spn_Y<bgcolor=0x00ff00,name="Spawn      Y">;
+    float   Spn_Z<bgcolor=0x00ff00,name="Spawn      Z">;
+    char    Difference[19]<hidden=true>; 
+    char    nName[]<bgcolor=0x800080,name="NPC ID">;
+    char    ObjCopyID[]<bgcolor=0x800080,name="Copy">;           
+    char    NUL4[6]<hidden=true>;   
+    char    CD[64]<hidden=true>;    
+    char    NUL5[1]<hidden=true>; 
+    uint32  NpcID0<name="NPC ID?">; 
+    uint32  NPCID1<name="NPC ID?">;
+    uint32  NPCID2<name="NPC ID?">;
+    uint32  unkn4;
+    uint32  unkn5;
+    long    FSMFlag<bgcolor=0x00000ff,name="FSM Bool?">;    
+    char    NUL6[39]<hidden=true>;
+    float   unkn6;
+    float   unkn7;
+    long    CloseUp<bgcolor=0x00000ff,name="Close Up Bool">;
+    char    NUL7<hidden=true>;
+    float   cPos_X<bgcolor=0x00ff00,name="Position   X">;
+    float   cPos_Y<bgcolor=0x00ff00,name="Position   Y">;
+    float   cPos_Z<bgcolor=0x00ff00,name="Position   Z">;
+    uint32  NUL8<hidden=true>;
+    float   cRot_X<bgcolor=0x00ff00,name="Rotation  X">;
+    float   cRot_Y<bgcolor=0x00ff00,name="Rotation  Y">;
+    float   cRot_Z<bgcolor=0x00ff00,name="Rotation  Z">;
+    uint32  NUL9[3]<hidden=true>;
+    float   cSpn_X<name="Spawn     X">;
+    float   cSpn_Y<name="Spawn     Y">;
+    float   cSpn_Z<name="Spawn     Z">;
+    float   unkn8;
+    uint64  FFFF1<hidden=true>;
+    uint32  NUL10<hidden=true>;
+    char    Command[]<bgcolor=0x800080,name="Read AI FSM">;
+    if (Command != ""){
+        char Path[]<bgcolor=0x800080,name="FSM Path">;
+    }
+    if (cType != "cQuestNpcSetter") {
+        char    FFFF2[4]<hidden=true,bgcolor=0x800080>;
+        char    NUL11[2]<hidden=true,bgcolor=0x800080>;
+    }
+} cVillageNpcSetter;
+
+//------------------------------------------------
+// String cSetObjects
+string ReadNpc(cVillageNpcSetter& v) {
+    string i;
+    string x;
+    string y;
+    string z;
+    string s;
+    SPrintf(x, "%d", (int)(v.Pos_X));
+    SPrintf(y, "%d", (int)(v.Pos_Y));
+    SPrintf(z, "%d", (int)(v.Pos_Z));
+    s = v.nName + "\t \t X: " + x + "\t Y: " + y + "\t Z: " + z;
+    return s;
+}
