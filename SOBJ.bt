@@ -1,0 +1,839 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.2 Binary Template
+//
+//      File: 
+//   Authors: Dave uRrr, Vuze, Material, DeathCream, Fandirus 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.sobj & *.sobjl
+//  ID Bytes: 
+//   History: 
+//          -Templated was created
+//          -Added support for cSetAnimalArea for the Wedge Beetles
+//          -Added cEmGroupSetter
+//          -Added cPlJumpPos
+//          -Added cFishingFloatSetter
+//          -Added cTerrainPoint
+//          -Added cTraceLogSetter
+//
+//      January 31, 2019
+//          -Added cOTGroupSetter starting template
+//
+//      February 02, 2019
+//          -Added cAssetBasicSetObject template
+//
+//      February 14, 2019
+//          -Added Parameter Functions to cAssetBasicSetObjects
+//          -Updated the cSetAnimalArea for gm_map.sobj
+//
+//      March 02, 2019
+//          -Added cSetPugeeActPoint
+//          -Added cSetPugeeReceivePlPoint
+//          -Added cSetPugeeRunAwayPoint
+//          -Added cSetPugeeSearchItemZone
+//
+//      March 05, 2019
+//          -Updated cVillageNpcSetter
+//
+//      March 14, 2019
+//          -Added cGm012ObjectSetParam
+//
+//      March 15, 2019
+//          -Updated cSetAnimalArea of Configuration and Unkn Struct
+//
+//      March 16, 2019
+//          -Updated cPlJumpPos
+//
+//      March 21, 2019
+//          -Created cEmDesireSetter & cRepopSetter by Material
+//
+//      March 25, 2019
+//          -Updated cTerrinPoint but still needs review
+//          -Created cSetFishArea Template
+//
+//      April 23, 2019
+//          -Updated cSetAnimalArea for Rarity
+//
+//      April 28, 2019
+//          -Updated cTraceLogSetter, contains more Data Types.
+//
+//      April 29, 2019
+//          -Updated information of cEmDesireSetter and cRepopSetter
+//              to the standard template format.
+//
+//      April 30, 2019
+//          -Merged cEmGroupSetter and cEmSetter because they
+//              pretty much are the same template.
+//
+//      May 3, 2019
+//          -Created cOtPosSetter Template
+//
+//      May 5, 2019
+//          -Created cOtRandomSetter Template
+//          -Added Compatability to cOtOtasukeSetter
+//          -Updated cOtGroupSetter
+//
+//      Oct 5, 2019
+//          -Start the Universal SOBJ to merge all the templates into one
+//          -Found the main body struct and split the additional parameter structs for
+//              each command.
+//
+//      Oct 6, 2019
+//          -Ported over cAssetBasicSetObject,cEmDesireSetter, cEmGroupSetter, cEmSetter, cEmRepopSetter,
+//              cFishingFloatSetter, cPlJumpPos, cTerrainPoint, cTraceLogSetter, cVillageNpcSetter
+//
+//------------------------------------------------
+
+//------------------------------------------------
+// Header Information
+typedef struct {
+    long    fType<name="File Type">;
+    if (fType == 6451059) {
+        long    Version;
+        long    sType;
+        long    SOHCnt;
+        char    SOH[SOHCnt];    //Only for Otomos
+    }
+    uint32  ObjCnt<bgcolor=0x0000ff,name="Object Count">;
+} Header;
+
+//------------------------------------------------
+// SOBJL File
+typedef struct {
+    long    SOH<bgcolor=0xff0000,name="Start of Header">;
+    long    ind<bgcolor=0x0000ff,name="Index">;
+    string  cmd<bgcolor=0x800800,name="Command">;
+    string  pat<bgcolor=0x800080,name="Path">;
+    uint32  NUL<name="Null">;
+} rSetObject;
+
+//------------------------------------------------
+// Spawn
+typedef struct {
+    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
+    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
+    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
+    float   Rot_X<bgcolor=0x00ff00,name="Rotation   X">;
+    float   Rot_Y<bgcolor=0x00ff00,name="Rotation   Y">;
+    float   Rot_Z<bgcolor=0x00ff00,name="Rotation   Z">;
+    float   Spn_X<bgcolor=0x00ff00,name="Spawn      X">;
+    float   Spn_Y<bgcolor=0x00ff00,name="Spawn      Y">;
+    float   Spn_Z<bgcolor=0x00ff00,name="Spawn      Z">;
+    local string s;
+    SPrintf(s, "[pX: %f \t pY: %f \t pZ: %f] \t [rX: %f \t rY: %f \t rZ: %f]", 
+                Pos_X, Pos_Y, Pos_Z, Rot_X, Rot_Y, Rot_Z);
+} Spawn;
+
+//------------------------------------------------
+// OddStruct
+typedef struct {
+    byte    SOH1;
+    byte    unkn0;
+    byte    unkn1;
+    byte    unkn2;
+    byte    unkn3;
+    if(cType == "cAssetBasicSetObject") {byte    unkn4[24];}
+    else {byte  unkn6[9];}
+    long    EOT1;
+} oStruct;
+
+//------------------------------------------------
+// Parameter Data Types
+typedef struct {
+    byte    bool<bgcolor=0xff0000>;
+} dBool;        //dType = 3
+
+typedef struct {
+    int32   value<bgcolor=0xff0000,name="Value">;
+} dInt32;       //dType - 4
+
+typedef struct {
+    float   draw<bgcolor=0x00ff00,name="Draw Distance">;
+} dFloat;       //dType = 6
+
+typedef struct {
+    float   Pos_X<bgcolor=0x00ff00,name="Position   X">;
+    float   Pos_Y<bgcolor=0x00ff00,name="Position   Y">;
+    float   Pos_Z<bgcolor=0x00ff00,name="Position   Z">;
+    uint32  NUL<hidden=true>;
+} dVector4;     //dType = 8
+
+typedef struct {
+    dVector4    dvector4[4]<read=ReadVector4,name="Matrix 4x4",optimize=false>;
+} dMatrix4X4;    //dType = 9
+
+typedef struct {
+    byte    NUL0<hidden=true>;
+    uint32  value<bgcolor=0xff0000,name="Value">;
+    byte    NUL1<hidden=true>;
+} dClass;       //dType =13
+
+//------------------------------------------------
+// Parameters
+typedef struct {
+    uint32  dType<name="Data Type">;
+    switch(dType) {
+        case 3  : dBool         dbool<read=ReadBool,name="Bool">;           break;
+        case 4  : dInt32        dint32<read=ReadInt32,name="Int32">;        break;
+        case 6  : dFloat        dfloatM<read=ReadFloat32,name="Float">;     break;
+        case 8  : dVector4      dvector4<read=ReadVector,name="Vector4">;   break;
+        case 9  : dMatrix4X4    dmatrix4x4<name="Matrix 4x4">;               break;
+        case 13 : dClass        dclass<read=ReadClass,name="Class">;        break;
+    }
+    string  PRM<bgcolor=0x800080,name="Parameter">;
+    uint32  DTypev<bgcolor=0xff0000,name="Data Type ID">;
+    string  DTypes<bgcolor=0x800080,name="Data Type String">;
+    uint32  class<bgcolor=0xff0000,name="Value/Class">;
+    byte    SOH[9]<hidden=true>;
+} Parameters;
+
+//------------------------------------------------
+// Gimmick
+typedef struct {
+    string  cmd;
+    uint32  unkn1;
+    uint32  unkn2;
+    float   unkn3;
+    float   unkn4;
+    float   unkn5;
+    float   unkn6;
+    float   unkn7;
+    float   unkn8;
+} GM;
+
+//------------------------------------------------
+// NPC Camera
+typedef struct {
+    float   Pos_X<bgcolor=0x00ff00,name="Position   X">;
+    float   Pos_Y<bgcolor=0x00ff00,name="Position   Y">;
+    float   Pos_Z<bgcolor=0x00ff00,name="Position   Z">;
+    uint32  NUL0<name="NULL">;
+    float   Rot_X<bgcolor=0x00ff00,name="Rotation  X">;
+    float   Rot_Y<bgcolor=0x00ff00,name="Rotation  Y">;
+    float   Rot_Z<bgcolor=0x00ff00,name="Rotation  Z">;
+    uint32  NUL1[3]<name="NULL">;
+    float   Spn_X<bgcolor=0x00ff00,name="Spawn     X">;
+    float   Spn_Y<bgcolor=0x00ff00,name="Spawn     Y">;
+    float   Spn_Z<bgcolor=0x00ff00,name="Spawn     Z">;
+    float   unkn8;
+} Camera;
+
+//------------------------------------------------
+// NPC Data
+typedef struct {
+    uint32  NpcID0<name="NPC ID?">; 
+    uint32  NPCID1<name="NPC ID?">;
+    uint32  NPCID2<name="NPC ID?">;
+    uint32  unkn4;
+    long    unkn5;
+    long    FSMFlag<bgcolor=0x00000ff,name="FSM Bool?">;    
+    byte    NUL6[39];
+    float   unkn6;
+    long    unkn7;
+    byte    CloseUp<bgcolor=0x00000ff,name="Close Up Bool">;
+    uint32  NUL7<hidden=true>;
+    Camera  camera<name="NPC Camera">;
+    uint64  FFFF1<hidden=true>;
+    uint32  NUL10<hidden=true>;
+    char    Command[]<bgcolor=0x800080,name="Read AI FSM">;
+    if (Command != ""){
+        char Path[]<bgcolor=0x800080,name="FSM Path">;
+    }
+    if (cType != "cQuestNpcSetter") {
+        char    FFFF2[4]<hidden=true,bgcolor=0x800080>;
+        char    NUL11[2]<hidden=true,bgcolor=0x800080>;
+    }
+} NPC;
+
+//------------------------------------------------
+// [EM] Loop Structs
+typedef struct {
+    char    SOH;
+    long    unkn0;
+    long    unkn1;
+    long    unkn2;
+    long    unkn3;
+} Uunkn;
+
+//------------------------------------------------
+// [EM] Loop Structs
+typedef struct {
+    long    ID;
+    float   unkn1;
+    float   unkn2;
+} Six;
+
+typedef struct {
+    char    SOH;
+    uint32  unkn0<bgcolor=0xff0000>;
+    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
+    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
+    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
+    float   Rot_X<bgcolor=0x00ff00,name="Rotation   X">;
+    float   Rot_Y<bgcolor=0x00ff00,name="Rotation   Y">;
+    float   Rot_Z<bgcolor=0x00ff00,name="Rotation   Z">;
+    float   Spn_X<bgcolor=0x00ff00,name="Spawn">;
+    char    AI[]<bgcolor=0x800080,name="Read AIFSM">;
+    if (AI != "") {char    aPath[]<bgcolor=0x800080,name="Path">;}
+    char    NUL0[2];
+    char    Thk[]<bgcolor=0x80080>;
+    if (Thk != "") {char    tPath[]<bgcolor=0x800080,name="Path">;}
+    uint32  variant<bgcolor=0xff0000,name="Status / Variant">;
+    char    zako[]<bgcolor=0x800080>;
+    char    NUL1[3];
+} AIFSM;
+
+//------------------------------------------------
+// [EM] Loop Structs
+typedef struct {
+    char    SOH;
+    //This IF might need to be removed or seperated only for EMS files
+    if (SOH != 1) {
+        char    Thk[]<bgcolor=0x800080,name="Think Table">;
+        if (Thk != ""){char    path[]<bgcolor=0x800080,name="Path">;}
+        char    AI[]<bgcolor=0x800080,name="Read AIFSM">;
+        if (AI != "") {char    aPath[]<bgcolor=0x800080,name="Path">;}
+        byte    NUL[5];
+    }
+    //cEmSetter only I believe
+    else {
+        long    unkn1;
+        uint32  unkn2;
+        uint32  unkn3;
+        byte    NUL0;
+        char    AI[]<bgcolor=0x800080,name="Read AIFSM">;
+        if (AI != "") {char    aPath[]<bgcolor=0x800080,name="Path">;}
+        byte    NUL[5];
+    }
+} ThinkTable;
+
+//------------------------------------------------
+// [EM] Loop Structs
+typedef struct {
+        char    Thk[]<bgcolor=0x800080,name="Think Table">;
+        if (Thk != ""){char    path[]<bgcolor=0x800080,name="Path">;}
+        char    AI[]<bgcolor=0x800080,name="Read AIFSM">;
+        if (AI != "") {char    aPath[]<bgcolor=0x800080,name="Path">;}
+        byte    NUL;    //DeathCream noticed it was a byte + long
+        long    unkn;
+} THKAIFSM;
+
+//------------------------------------------------
+// Zako Spawn
+typedef struct {
+    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
+    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
+    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
+    float   unkn16;
+    float   unkn17;
+    long    FFFF2;
+    long    FFFF3;
+} ZakoSpawn;
+
+//------------------------------------------------
+// Boss Spawn
+typedef struct {
+    char    SOH;
+    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
+    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
+    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
+    float   unkn<bgcolor=0x00ff00>;
+    string  cmd<bgcolor=0x800080,name="rSetObject">;
+    if (cmd != ""){char path[]<bgcolor=0x800080,name="Path">;}
+} BossSpawn;
+
+//------------------------------------------------
+// Boss Trace
+typedef struct {
+    char    SOH;
+    long    FFFF4;
+    long    FFFF5<bgcolor=0xff0000>;
+    string  cmd<bgcolor=0x800080,name="rSetObject">;
+    if (cmd != ""){char path[]<bgcolor=0x800080,name="Path">;}
+} TraceSet;
+
+//------------------------------------------------
+// [EM] Boss Data
+typedef struct {
+    float   Size<name="Monster Size">;
+    float   unkn3;
+    long    unkn4;
+    long    mID<bgcolor=0x800080,name="Monster ID">;
+    float   unkn6;
+    uint32  fCnt<name="[AIFSM] Count">;
+    Uunkn uunkn[fCnt]<read=ReadUunkn,name="[AIFSM] Data",optimize=false>; //cEmGroupSetter
+    uint32  six1;
+    uint32  six2;
+    Six six[six2]<read=ReadSix,name="Unknown SIX">; //cEmGroupSetter
+    long    uCnt<name="AIFSM Bool??">;
+    if (uCnt == 1) {ThinkTable  thinktable<name="Think Table">;} //cEmGroupSetter
+    else{THKAIFSM   thkaifsm<name="Think Table/AI FSM">;}
+    long    FFFF1;
+    long    unkn15; //if FFFF=FFFF 2 in arenas, 0 Rath
+    char    NUL3;
+    long    sCnt<bgcolor=0x0000ff,name="[Zako] Count">;
+    ZakoSpawn zakospawn[sCnt]<read=ReadZako,name="[Zako] Spawn",optimize=false>; //cEmGroupSetter
+    uint32  lCnt<bgcolor=0x0000ff,name="[Boss] Count">;
+    BossSpawn bossspawn[lCnt]<read=ReadSetTrace,name="[Boss] Spawn",optimize=false>;
+    long  TraceBool<bgcolor=0x0000ff,name="Trace Bool">;
+    if (TraceBool == 1) {TraceSet ts<read=ReadSetTrace,name="Trace">;}
+    uint32  NUL4[3]<hidden=true>;
+} EM;
+
+//------------------------------------------------
+// [EMGroup] Zako Data
+typedef struct {
+    long    unkn2;
+    long    unkn3;
+    float   unkn4;
+    float   unkn5;
+    float   unkn6;
+    long    unkn7;
+    float   unkn8;
+    uint32  fCnt;
+    AIFSM aifsm[fCnt]<name="[AIFSM] Count">;
+    uint32  six1;
+    uint32  six2;
+    Six six[six2]<read=ReadSix,name="Unknown SIX">; //cEmGroupSetter
+    long    uCnt;
+    Uunkn uunkn[uCnt]<read=ReadUunkn,name="[AIFSM] Data",optimize=false>; //cEmGroupSetter
+    long    unkn13;
+    if (unkn13 == 1) {Uunkn uunkn<read=ReadUunkn,name="[AIFSM] Data",optimize=false>;} //cEmGroupSetter 
+    long    FFFF1;
+    long    unkn15;
+    char    NUL3;
+    if(NUL3 == -1) {uint32 NUL5;}
+    long    sCnt<bgcolor=0x0000ff,name="Zako Count">;
+    ZakoSpawn zakospawn[sCnt]<read=ReadZako,name="[Zako] Spawn",optimize=false>; //cEmGroupSetter
+    uint32  NUL4[3]<hidden=true>;
+} EMGroup;
+
+//------------------------------------------------
+// [EMDesire] Loop Structs
+typedef struct {
+    char    SOH<hidden=true>;
+    long    CoordType<bgcolor=0xff0000,name="Coord Type">;
+    float   aPos_X<bgcolor=0x00ff00,name="Point A    X">;
+    float   aPos_Y<bgcolor=0x00ff00,name="Point A    Y">;
+    float   aPos_Z<bgcolor=0x00ff00,name="Point A    Z">;
+    float   bPos_X<bgcolor=0x00ff00,name="Point B   X">;
+    float   bPos_Y<bgcolor=0x00ff00,name="Point B   Y">;
+    float   bPos_Z<bgcolor=0x00ff00,name="Point B   Z">;
+    long    Action<bgcolor=0xff0000,name="Action">;
+    uint32  unkn<bgcolor=0xff0000>;
+} Route;
+
+//------------------------------------------------
+// [EMDesire] Loop Structs
+typedef struct {
+    char    SOH<hidden=true>;
+    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
+    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
+    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
+    float   unkn5<bgcolor=0x00ff00>;
+    float   unkn6<bgcolor=0x00ff00>;
+    float   unkn7<bgcolor=0x00ff00>;
+    float   unkn8<bgcolor=0x00ff00>;
+    float   unkn9<bgcolor=0x00ff00>;
+    float   unkn10<bgcolor=0x00ff00>;
+    float   unkn11<bgcolor=0x00ff00>;
+    char    SOH1<hidden=true>;
+} Repop;
+
+//------------------------------------------------
+// [EMDesire]
+typedef struct {
+    uint32  cCnt<bgcolor=0x0000ff,name="Coordinate Count">;
+    if (cType == "cEmDesireSetter"){Route r[cCnt]<read=ReadRoute,name="Route Coordinates",optimize=false>;}
+    if (cType == "cEmRepopSetter"){Repop p[cCnt]<read=ReadRepop,name="Repop Coordinates",optimize=false>;}
+} EMDesire;
+
+//------------------------------------------------
+// [SetAnimalArea] Spawn Config
+typedef struct {
+    char    SOH;
+    local int i<hidden=true>;
+    for(i = 0; i < 12; i++){float   unkn<optimize=false>;}
+    float   Pos_X<name="Position   X",bgcolor=0x00ff00>;
+    float   Pos_Y<name="Position   Y",bgcolor=0x00ff00>;
+    float   Pos_Z<name="Position   Z",bgcolor=0x00ff00>;
+    float   unkn;
+} AnimalConfig;
+
+//------------------------------------------------
+// [SetAnimalArea] Unknown
+typedef struct {
+    char    SOH4;
+    uint32  unkn3;
+    uint32  unkn4;
+    float   Pos_X<name="Position   X",bgcolor=0x00ff00>;
+    float   Pos_Y<name="Position   Y",bgcolor=0x00ff00>;
+    float   Pos_Z<name="Position   Z",bgcolor=0x00ff00>;
+    uint64  unkn8;
+    float   unkn9;
+} AnimalUnkn1;
+
+//------------------------------------------------
+// [SetAnimalArea] Rarity
+typedef struct {
+    char    SOH;
+    uint32  aCnt<name="Rarity Count">;
+    float   rarity<name="Spawn Rate">;
+    byte    unkn1;
+    byte    unkn2;
+} Rarity;
+
+//------------------------------------------------
+// [SetAnimalArea] Radii
+typedef struct {
+    char    NUL4<hidden=true>;
+    float   Range<name="Range",bgcolor=0x00ffff>; 
+    float   Set_Y<name="Set Height",bgcolor=0x00ffff>;
+    local int i<hidden=true>;
+    for (i = 0; i < 5; ++i) {
+        float   Radii_X<name="Radii         X \t",bgcolor=0x00ffff>;
+        float   Radii_Y<name="Radii         Y \t",bgcolor=0x00ffff>;
+        float   Radii_Z<name="Radii         Z \t",bgcolor=0x00ffff>;
+        uint32  NUL6<name="...............">;
+    }
+} Radii;
+
+//------------------------------------------------
+// [SetAnimalArea]
+typedef struct {
+    uint32  ID<name="Animal ID">;
+    uint32  Magic0;
+    uint32  Magic1;
+    uint32  Magic2;
+    float   unkn2;
+    Radii   radii<name="Radii Setup">;
+    char    SOH1<hidden=true>;
+    uint32  NUL11<hidden=true>;
+    uint32  aCount<name="Animal Count",bgcolor=0x0000ff>;
+    AnimalConfig animalconfig[aCount]<name="Animal Configuration",optimize=false>;
+    uint32  Magic3;
+    AnimalUnkn1 animalunkn1[Magic3]<name="Animal Unkn",optimize=false>;
+    byte    rBool<name="Rarity Bool">;
+    if (rBool == 1) {
+        uint32  rCnt<name="Rarity Count">;
+        Rarity rarity[rCnt]<read=ReadRarity,name="Rarity Configuration",optimize=false>;
+    }
+    char    NUL16<hidden=true>;
+} AnimalArea;
+
+//------------------------------------------------
+// [SetFishArea] FishConfig
+typedef struct {
+    char    SOH0;
+    uint32  fID<name="Fish ID">;
+    local float unknf<hidden=true>;
+    if (fID == 0) {
+        char SOH1;
+        uint32  fishID<name="Fish ID">;
+        uint32  unkn0;
+        uint32  fCnt<bgcolor=0x800080,name="Fish Count">;
+        uint32  unkn1;
+    }
+    else{
+        uint32  unkn0;
+        uint32  fCnt<bgcolor=0x80080,name="Fish Count">;
+        uint32  unkn1;
+    }
+    byte    rFlag<name="Rarity Bool">;
+    if (rFlag == 1) {
+        uint32  rCnt<bgcolor=0x0000ff,name="Rarity Count">;
+        Rarity rarity[rCnt]<read=ReadRarity,name="Rarity Configuration">;
+    }
+    char    SOH2;
+    if (SOH2 == 0) {}
+    else{
+        float   Spawn0;
+        if (Spawn0 == 1) {Radii radii<name="Fish Radii">;}
+        else {
+            float   Spawn1;
+            short   unkn6;
+            char    SOH3;
+            float   Spawn2;
+            Radii radii<name="Fish Radii">;
+        }
+    }
+} FishConfig;
+
+//------------------------------------------------
+// [SetFishArea] Radii
+typedef struct {
+    char    SOH;
+    if (SOH ==0) {FSkip(-1);}
+    else {uint32  unkn0;}
+    float   unkn1;
+    if (unkn1 == 0) {uint32  NUL;}
+    else{Radii radii<name="Fish Radii">;}
+    char    SOH1;
+    uint64  NUL1;
+} FishRadii;
+
+//------------------------------------------------
+// [SetFishArea] Coordinates
+typedef struct {
+    char    SOH;
+    local int i<hidden=true>;
+    for (i = 0; i < 8 ; ++i) {float   unkn;}
+} FishCoord;
+
+//------------------------------------------------
+// [SetFishArea]
+typedef struct {
+    uint32  vCnt<bgcolor=0x0000ff,name="Fish Variety">;
+    FishConfig   fc[vCnt]<read=ReadFishConfig,name="Fish Configuration",optimize=false>;
+    FishRadii   fr<name="Fish Radii">;
+    uint32  cCnt<bgcolor=0x0000ff,name="Fish Count">;
+    FishCoord  fishcoord[cCnt]<name="Fish Coordinates">;
+    byte    rBool<name="Rarity Bool">;
+    if (rBool == 1) {
+        uint32  cRarity<bgcolor=0x0000ff,name="Rarity Count">;
+        Rarity rarity[cRarity]<read=ReadRarity,name="Rarity Configuration",optimize=false>;
+    }
+} FishArea;
+
+//------------------------------------------------
+// Player Spawn Data
+typedef struct {
+    uint32      ID;
+    local int i<hidden=true>;
+    for (i = 0; i < 15; i++){
+        float   MP_Pos_X<name="Multiplayer Position X">;
+        float   MP_Pos_Y<name="Multiplayer Position Y">;
+        float   MP_Pos_Z<name="Multiplayer Position Z">;
+    }
+} PlJumpPos;
+
+//------------------------------------------------
+// Terrain Point
+typedef struct {
+    byte    NUL0;
+    ushort  unkn0;
+    ushort  unkn1;
+    byte    NUL1;
+    long    unkn2;
+    byte    NUL2;
+} Terrain;
+
+//------------------------------------------------
+// TraceLogSetter
+typedef struct {
+    string  ReadData<bgcolor=0x800080,name="Read Data">;
+    string  Path<bgcolor=0x800080,name="File Path">;
+    uint32  unkn1;
+    uint32  unkn2;
+    float   unkn3;
+    long    unkn4;
+    long    unkn5;
+    long    unkn6;
+    long    unkn7;
+    long    unkn8;
+    byte    SOH1;
+    uint32  unkn9;
+    if (cType == "cKimenTraceLogSetter") {byte unkn10;}
+    if (cType == "cNpcTraceLogSetter") {uint32  unkn10;}
+} TraceLog;
+
+//------------------------------------------------
+// SOBJ
+typedef struct {
+    byte    SOH0<hidden=true>;
+    string  cType<bgcolor=0xFF0000,name="Command Type">;
+    long    EOT0<hidden=true>;
+    Spawn   spawn<read=ReadSpawn,name="Spawn">;
+    string  oName<bgcolor=0xff0000,name="[Object] Name">;
+    oStruct ostruct<name="Odd Struct">;
+    string  pointA<bgcolor=0x800080,name="[Object] Pointer A / [Name] Folder">;
+    string  pointB<bgcolor=0x800080,name="[Object] Pointer B / [Name] Unknown">;
+    short   NULL;
+    uint32  pCount<bgcolor=0x0000ff,name="[Object] Parameter Count">;
+    if (pCount != 0) {Parameters parameters[pCount]<read=ReadParam,name="Parameters",optimize=false>;}
+    byte    CD[64]<name="CD NULL">;
+    byte    gm<name="[Object] GM Extra">;
+    if(gm != 0){GM  gm<name="GM Unknown">;}
+    if (Strstr(cType, "cSetAnim") == 0){AnimalArea  aa<bgcolor=0x010010,name="cSetAnimalArea Data">;}
+    if (Strstr(cType, "cSetFish") == 0){FishArea    fa<bgcolor=0x010010,name="cSetFishArea Data">;}
+    if (Strstr(cType, "cVillage") == 0){NPC         npc<bgcolor=0x010010,name="cVillageNPCSetter Data">;}
+    if (Strstr(cType, "cQuestNp") == 0){NPC         npc<bgcolor=0x010010,name="cQuestNpcSetter Data">;}
+    if (Strstr(cType, "cEmDesir") == 0){EMDesire    emd<bgcolor=0x010010,name="cEmDesireSetter Data">;}
+    if (Strstr(cType, "cEmRepop") == 0){EMDesire    emd<bgcolor=0x010010,name="cEMRepopSetter">;}
+    if (Strstr(cType, "cEmSette") == 0){EM          em<bgcolor=0x010010,name="cEMSetter Data">;}
+    if (Strstr(cType, "cEmGroup") == 0){EMGroup     emg<bgcolor=0x010010,name="cEmGroupSetter Data ">;}
+    if (Strstr(cType, "cPlJumpP") == 0){PlJumpPos   pjp<bgcolor=0x010010,name="cPlJumpPos Data">;}
+    if (Strstr(cType, "cTerrain") == 0){Terrain     tp<bgcolor=0x010010,name="cTerrainPoint Data">;}
+    if (Strstr(cType, "cTraceLo") == 0){TraceLog    tl<bgcolor=0x010010,name="cTraceLogSetter Data">;}
+    if (Strstr(cType, "cKimenTr") == 0){TraceLog    tl<bgcolor=0x010010,name="cKimentTraceLogSetter">;}
+    if (Strstr(cType, "cNpcTrac") == 0){TraceLog    tl<bgcolor=0x010010,name="cNpcTraceLogSetter">;}
+    if (Strstr(cType, "cWildCat") == 0){TraceLog    tl<bgcolor=0x010010,name="cWildCatTraceLogSetter">;}
+    //Mostly for printing
+    local float x;
+    local float y;
+    local float z;
+    
+    x = spawn.Pos_X;
+    y = spawn.Pos_Y;
+    z = spawn.Pos_Z;
+
+    local int32 ID;
+    local int32 R;
+    local int32 C;
+    if (Strstr(cType, "cSetAnim") == 0){ID = aa.ID; R = aa.rBool;}
+    if (Strstr(cType, "cSetFish") == 0){C = fa.vCnt; R = fa.rBool;}
+} SOBJ;
+
+//------------------------------------------------
+//Read Strings
+string ReadHead(Header& r) {
+    string s;
+    SPrintf(s, "Obj: %d", r.ObjCnt);
+    return s;
+}
+
+string ReadSOBJL(rSetObject& r) {
+    string s;
+    SPrintf(s, "Index: %d \t " + r.pat, r.ind);
+    return s;
+}
+
+string ReadSpawn(Spawn& r) {
+    string s;
+    s = r.s;
+    return s;
+}
+
+string ReadBool(dBool& r) {
+    string s;
+    SPrintf(s, "Value: %d", r.bool);
+    return s;
+}
+
+string ReadInt32(dInt32& r) {
+    string s;
+    SPrintf(s, "Value: %d", r.value);
+    return s;
+}
+
+string ReadFloat32(dFloat& r) {
+    string s;
+    SPrintf(s, "Value: %f", r.draw);
+    return s;
+
+}
+
+string ReadVector4(dVector4& r) {
+    string s;
+    SPrintf(s, "X: %f \t Y: %f \t Z: %f", r.Pos_X, r.Pos_Y, r.Pos_Z);
+    return s;
+}
+
+string ReadParam(Parameters& r) {
+    string s;
+    s = r.PRM;
+    return s;
+}
+
+string ReadSix(Six& r) {
+    string s;
+    SPrintf(s, "%d %d %d", r.unkn0, r.unkn1, r.unkn2);
+    return s;
+}
+
+string ReadUunkn(Uunkn& r) {
+    string s;
+    SPrintf(s, "%d %d %d %d", r.unkn0, r.unkn1, r.unkn2, r.unkn3);
+    return s;
+}
+
+string ReadZako(ZakoSpawn& r) {
+    string s;
+    SPrintf(s, "Unkn: %d \t [X: %f \t Y: %f \t Z: %f]", r.unkn16, r.Pos_X, r.Pos_Y, r.Pos_Z);
+    return s;
+}
+
+string ReadSetTrace(BossSpawn& r) {
+    string s;
+    SPrintf(s, "Spawn: %f \t [X: %f \t Y: %f \t Z: %f]", r.unkn, r.Pos_Z, r.Pos_Y, r.Pos_Z);
+    return s;
+}
+
+string ReadRoute(Route& r) {
+    string s;
+    SPrintf(s, "Action: %d \t A[X: %f \t Y: %f \t Z: %f] \t B[X: %f \t Y: %f \t Z: %f]", 
+            r.Action, r.aPos_X, r.aPos_Y, r.aPos_Z, r.bPos_X, r.bPos_Y, r.bPos_Z);
+    return s;
+}
+
+string ReadRepop(Repop& r) {
+    string s;
+    SPrintf(s, "[X: %f \t Y: %f \t Z: %f]", r.Pos_X, r.Pos_Y, r.Pos_Z);
+    return s;
+}
+  
+string ReadSOBJ(SOBJ& r){
+    string s;
+
+    if (r.cType == "cSetFishArea") {
+        SPrintf(s, "CT: %d \t Rarity: %d \t [X: %f \t Y: %f \t Z: %f]", r.C, r.R, r.x, r.y, r.z);
+    }
+    if (r.cType == "cSetAnimalArea"){
+        SPrintf(s, "ID: %d \t Rarity: %d \t [X: %f \t Y: %f \t Z: %f]", r.ID, r.R, r.x, r.y, r.z);
+    }
+    if (r.oName != "") {SPrintf(s, r.oName + "\t" + r.pointA + "\t" + r.pointB + "\t [X: %f \t Y: %f \t Z: %f]", r.x, r.y, r.z);}
+    return s;
+}
+
+string ReadFishConfig(FishConfig& f) {
+    string s;
+    uint32  Fish;
+    if (f.fID == 0) {Fish = f.fishID;}
+    else{Fish = f.fID;}
+    SPrintf(s, "ID: %d \t Count: %d", Fish, f.fCnt);
+    return s; 
+}
+
+string ReadRarity(Rarity& r) {
+    string i;
+    string p;
+    string s;
+    SPrintf(s, "Unkn: %d \t Spawn Rate: %f", r.aCnt, r.rarity);
+    return s;
+}
+//------------------------------------------------
+//Display Info
+Header header<bgcolor=0x00ffff,read=ReadHead,name="Header">;
+
+local int i;
+local int p;
+local string cType;
+
+for (i = 0; i < header.ObjCnt; i++) {
+    if (header.fType == 9) {
+        rSetObject  sobjl<name="rSetObject",read=ReadSOBJL>;
+    }
+    if (header.fType == 6451059) {
+        FSkip(1);
+        cType = ReadString(FTell());
+        switch (cType) {
+            case "cSetAnimalArea"           : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cSetAnimalArea">;            break;
+            case "cSetFishArea"             : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cSetFishArea">;              break;
+            case "cAssetBasicSetObject"     : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cAssetBasicObject">;         break;
+            case "cEmDesireSetter"          : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cEmDesireSetter">;           break;
+            case "cEmGroupSetter"           : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cEmGroupSetter">;            break;
+            case "cEmRepopSetter"           : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cEmRepopSetter">;            break;
+            case "cEmSetter"                : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cEmSetter">;                 break;
+            case "cFishingFloatSetter"      : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cFishingFloatSetter">;       break;
+            case "cPlJumpPos"               : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cPlJumpPos">;                break;
+            case "cTerrainPoint"            : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cTerrainPoint">;             break;
+            case "cTraceLogSetter"          : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cTraceLogSetter">;           break;
+            case "cKimenTraceLogSetter"     : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cKimenTraceLogSetter">;      break;
+            case "cNpcTraceLogSetter"       : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cNpcTraceLogSetter">;        break;
+            case "cWildCatTraceLogSetter"   : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cWildCatTraceLogSetter">;    break;
+            case "cVillageNpcSetter"        : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cVillageNpcSetter">;         break;
+            case "cQuestNpcSetter"          : FSkip(-1); SOBJ sobj<read=ReadSOBJ,name="cQuestNpcSetter">;           break;
+        }
+    }
+}
