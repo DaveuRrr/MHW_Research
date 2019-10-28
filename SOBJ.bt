@@ -93,7 +93,7 @@ typedef struct {
         long    Version;
         long    sType;
         long    SOHCnt;
-        char    SOH[SOHCnt];    //Only for Otomos
+        if (SOHCnt > 0){char    SOH[SOHCnt];}    //Only for Otomos
     }
     uint32  ObjCnt<bgcolor=0x0000ff,name="Object Count">;
 } Header;
@@ -362,7 +362,7 @@ typedef struct {
     long    mID<bgcolor=0x800080,name="Monster ID">;
     float   unkn6;
     uint32  fCnt<name="[AIFSM] Count">;
-    Uunkn uunkn[fCnt]<read=ReadUunkn,name="[AIFSM] Data",optimize=false>; //cEmGroupSetter
+    if (fCnt > 0) {Uunkn uunkn[fCnt]<read=ReadUunkn,name="[AIFSM] Data",optimize=false>;} //cEmGroupSetter
     uint32  six1;
     uint32  six2;
     Six six[six2]<read=ReadSix,name="Unknown SIX">; //cEmGroupSetter
@@ -373,9 +373,9 @@ typedef struct {
     long    unkn15; //if FFFF=FFFF 2 in arenas, 0 Rath
     char    NUL3;
     long    sCnt<bgcolor=0x0000ff,name="[Zako] Count">;
-    ZakoSpawn zakospawn[sCnt]<read=ReadZako,name="[Zako] Spawn",optimize=false>; //cEmGroupSetter
+    if (sCnt > 0) {ZakoSpawn zakospawn[sCnt]<read=ReadZako,name="[Zako] Spawn",optimize=false>;} //cEmGroupSetter
     uint32  lCnt<bgcolor=0x0000ff,name="[Boss] Count">;
-    BossSpawn bossspawn[lCnt]<read=ReadSetTrace,name="[Boss] Spawn",optimize=false>;
+    if (lCnt > 0) {BossSpawn bossspawn[lCnt]<read=ReadSetTrace,name="[Boss] Spawn",optimize=false>;}
     long  TraceBool<bgcolor=0x0000ff,name="Trace Bool">;
     if (TraceBool == 1) {TraceSet ts<read=ReadSetTrace,name="Trace">;}
     uint32  NUL4[3]<hidden=true>;
@@ -392,12 +392,12 @@ typedef struct {
     long    unkn7;
     float   unkn8;
     uint32  fCnt;
-    AIFSM aifsm[fCnt]<name="[AIFSM] Count">;
+    if (fCnt > 0) {AIFSM aifsm[fCnt]<name="[AIFSM] Count">;}
     uint32  six1;
     uint32  six2;
     Six six[six2]<read=ReadSix,name="Unknown SIX">; //cEmGroupSetter
     long    uCnt;
-    Uunkn uunkn[uCnt]<read=ReadUunkn,name="[AIFSM] Data",optimize=false>; //cEmGroupSetter
+    if (uCnt > 0) {Uunkn uunkn[uCnt]<read=ReadUunkn,name="[AIFSM] Data",optimize=false>;} //cEmGroupSetter
     long    unkn13;
     if (unkn13 == 1) {Uunkn uunkn<read=ReadUunkn,name="[AIFSM] Data",optimize=false>;} //cEmGroupSetter 
     long    FFFF1;
@@ -405,7 +405,7 @@ typedef struct {
     char    NUL3;
     if(NUL3 == -1) {uint32 NUL5;}
     long    sCnt<bgcolor=0x0000ff,name="Zako Count">;
-    ZakoSpawn zakospawn[sCnt]<read=ReadZako,name="[Zako] Spawn",optimize=false>; //cEmGroupSetter
+    if (sCnt > 0) {ZakoSpawn zakospawn[sCnt]<read=ReadZako,name="[Zako] Spawn",optimize=false>;} //cEmGroupSetter
     uint32  NUL4[3]<hidden=true>;
 } EMGroup;
 
@@ -511,9 +511,9 @@ typedef struct {
     char    SOH1<hidden=true>;
     uint32  NUL11<hidden=true>;
     uint32  aCount<name="Animal Count",bgcolor=0x0000ff>;
-    AnimalConfig animalconfig[aCount]<name="Animal Configuration",optimize=false>;
+    if (aCount > 0) {AnimalConfig animalconfig[aCount]<name="Animal Configuration",optimize=false>;}
     uint32  Magic3;
-    AnimalUnkn1 animalunkn1[Magic3]<name="Animal Unkn",optimize=false>;
+    if (Magic3 > 0) {AnimalUnkn1 animalunkn1[Magic3]<name="Animal Unkn",optimize=false>;}
     byte    rBool<name="Rarity Bool">;
     if (rBool == 1) {
         uint32  rCnt<name="Rarity Count">;
@@ -526,17 +526,17 @@ typedef struct {
 // [SetFishArea] FishConfig
 typedef struct {
     char    SOH0;
-    uint32  fID<name="Fish ID">;
+    uint32  fID<name="Great Fish ID">;
     local float unknf<hidden=true>;
     if (fID == 0) {
         char SOH1;
         uint32  fishID<name="Fish ID">;
-        uint32  unkn0;
+        uint32  version<name="Version">;
         uint32  fCnt<bgcolor=0x800080,name="Fish Count">;
         uint32  unkn1;
     }
     else{
-        uint32  unkn0;
+        uint32  version<name="Version">;
         uint32  fCnt<bgcolor=0x80080,name="Fish Count">;
         uint32  unkn1;
     }
@@ -588,7 +588,7 @@ typedef struct {
     FishConfig   fc[vCnt]<read=ReadFishConfig,name="Fish Configuration",optimize=false>;
     FishRadii   fr<name="Fish Radii">;
     uint32  cCnt<bgcolor=0x0000ff,name="Fish Count">;
-    FishCoord  fishcoord[cCnt]<name="Fish Coordinates">;
+    if (cCnt > 0) {FishCoord  fishcoord[cCnt]<name="Fish Coordinates",optimize=false>;}
     byte    rBool<name="Rarity Bool">;
     if (rBool == 1) {
         uint32  cRarity<bgcolor=0x0000ff,name="Rarity Count">;
@@ -775,23 +775,34 @@ string ReadRepop(Repop& r) {
   
 string ReadSOBJ(SOBJ& r){
     string s;
-
-    if (r.cType == "cSetFishArea") {
-        SPrintf(s, "CT: %d \t Rarity: %d \t [X: %f \t Y: %f \t Z: %f]", r.C, r.R, r.x, r.y, r.z);
-    }
     if (r.cType == "cSetAnimalArea"){
         SPrintf(s, "ID: %d \t Rarity: %d \t [X: %f \t Y: %f \t Z: %f]", r.ID, r.R, r.x, r.y, r.z);
     }
-    if (r.oName != "") {SPrintf(s, r.oName + "\t" + r.pointA + "\t" + r.pointB + "\t [X: %f \t Y: %f \t Z: %f]", r.x, r.y, r.z);}
+    if (r.cType == "cSetFishArea") {
+        SPrintf(s, "CT: %d \t Rarity: %d \t [X: %f \t Y: %f \t Z: %f]", r.C, r.R, r.x, r.y, r.z);
+    }
+    if (r.cType == "cAssetBasicSetObject") {
+        SPrintf(s, r.oName + "\t" + r.pointA + "\t" + r.pointB + "\t [X: %f \t Y: %f \t Z: %f]", r.x, r.y, r.z);
+    }
+    if (r.cType == "cVillageNpcSetter" || r.cType == "cQuestNpcSetter"){
+        SPrintf(s, r.oName + "\t" + r.pointA + "\t" + r.pointB + "\t [X: %f \t Y: %f \t Z: %f]", r.x, r.y, r.z);
+    }
     return s;
 }
 
 string ReadFishConfig(FishConfig& f) {
     string s;
+    string v;
     uint32  Fish;
-    if (f.fID == 0) {Fish = f.fishID;}
-    else{Fish = f.fID;}
-    SPrintf(s, "ID: %d \t Count: %d", Fish, f.fCnt);
+    if (f.fID == 0) {
+        Fish = f.fishID;
+        v = "Regular";
+    }
+    else{
+        Fish = f.fID;
+        v = "Greater";
+    }
+    SPrintf(s, "Ver: " + v + "\t ID: %d \t Count: %d", Fish, f.fCnt);
     return s; 
 }
 
