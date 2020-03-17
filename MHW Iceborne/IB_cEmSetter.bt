@@ -56,7 +56,12 @@ typedef struct {
     long    unkn7;
     float   unkn8;
     uint32  fCnt;
-    if (fCnt > 0) {AIFSM aifsm[fCnt]<name="[AIFSM] Count",optimize=false>;}
+    if (fCnt > 0) {
+        AIFSM aifsm[fCnt]<name="[AIFSM] Count",optimize=false>;
+        long IBAITHK;
+        if(IBAITHK != 0){THKAIFSM thkaifsm;}
+        else{uint32 unkn9[2];}
+    }
     //uint32  six1;
     uint32  six2;
     Six six[six2]<read=ReadSix,name="Unknown SIX">; //cEmGroupSetter

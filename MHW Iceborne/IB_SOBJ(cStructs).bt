@@ -112,14 +112,8 @@ typedef struct {
 // Gimmick
 typedef struct {
     string  cmd;
-    uint32  unkn1;
-    uint32  unkn2;
-    float   unkn3;
-    float   unkn4;
-    float   unkn5;
-    float   unkn6;
-    float   unkn7;
-    float   unkn8;
+    uint32  fCnt;
+    float   unkn2[fCnt];
 } GM;
 
 //------------------------------------------------
@@ -319,7 +313,6 @@ typedef struct {
     if (Thk != "") {char    tPath[]<bgcolor=0x800080,name="Path">;}
     uint32  variant<bgcolor=0xff0000,name="Status / Variant">;
     char    zako[]<bgcolor=0x800080>;
-    uint32  NULL1[3];
 } AIFSM;
 
 //------------------------------------------------
