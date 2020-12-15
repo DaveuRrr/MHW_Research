@@ -1,0 +1,28 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.2 Binary Template
+//
+//      File: 
+//   Authors: Dave uRrr
+//   Version: 
+//   Purpose: sub Scruct for SOBJ.bt
+//  Category: 
+// File Mask: SOBJ.bt
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//------------------------------------------------
+// [SetFishArea]
+typedef struct {
+    uint32  vCnt<bgcolor=0x0000ff,name="Fish Variety">;
+    FishConfig   fc[vCnt]<read=ReadFishConfig,name="Fish Configuration",optimize=false>;
+    FishRadii   fr<name="Fish Radii">;
+    uint32  cCnt<bgcolor=0x0000ff,name="Fish Count">;
+    if (cCnt > 0) {FishCoord  fishcoord[cCnt]<name="Fish Coordinates",optimize=false>;}
+    byte    rBool<name="Rarity Bool">;
+    uint32  NULL;
+    if (rBool == 1) {
+        uint32  cRarity<bgcolor=0x0000ff,name="Rarity Count">;
+        Rarity rarity[cRarity]<read=ReadRarity,name="Rarity Configuration",optimize=false>;
+    }
+} FishArea;

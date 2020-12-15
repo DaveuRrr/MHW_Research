@@ -1,0 +1,19 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.2 Binary Template
+//
+//      File: 
+//   Authors: Dave uRrr
+//   Version: 
+//   Purpose: sub Scruct for SOBJ.bt
+//  Category: 
+// File Mask: SOBJ.bt
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//------------------------------------------------
+// Player Spawn Data
+typedef struct {
+    uint64      ID;
+    PlVector plv[15]<bgcolor=0x000AA00,read=ReadPlVector,name="Player Coordinates",optimize=false>;
+} PlJumpPos;
