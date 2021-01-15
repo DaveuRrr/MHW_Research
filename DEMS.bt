@@ -1,0 +1,40 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.1 Binary Template
+//
+//      File: 
+//   Authors: Fandirus & Dave uRrr & Hexhexhex
+//   Version: 
+//   Purpose: 010 Template for discoverEmSet.DEMS
+//  Category: 
+// File Mask: *.dems
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+typedef struct {
+    if (type == 403247105) {uint32 IBSignature;}
+    uint16 unk;
+    uint32 entryCount;
+} Header;
+
+typedef struct {
+    uint32 st101_intChance;
+    uint32 st102_intChance;
+    uint32 st103_intChance;
+    uint32 st104_intChance;
+    uint32 st105_intChance;
+    if (type == 403247105) {uint32 st108_intChance;}
+    uint32 st000_intChance;
+    uint32 transitions[14];
+} Rank;
+
+typedef struct {
+    uint32 monsterID;
+    Rank   LowRank;
+    Rank   HighRank;
+    if (type == 403247105) {Rank MasterRank;}
+} Entry;
+
+uint32 type;
+FSkip(-4);
+Header header;
+Entry entries[header.entryCount];
