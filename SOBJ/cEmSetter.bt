@@ -12,6 +12,13 @@
 //------------------------------------------------
 
 //------------------------------------------------
+// THKPaths by Asterisk
+typedef struct{
+    long structureHash;
+    if (structureHash) string path; 
+}structurePath;
+
+//------------------------------------------------
 // [EM] Boss Data
 typedef struct {
     float   Size<name="Monster Size">;
@@ -25,22 +32,9 @@ typedef struct {
     uint32  six2;
     Six six[six2]<read=ReadSix,name="Unknown SIX">; //cEmGroupSetter
     long    uCnt<name="AIFSM Bool??">;
-    if (uCnt == 1) {
-        ThinkTable  thinktable<name="Think Table">;
-        long    THKHash;
-        if(THKHash != 0) {string THKpath;}
-        long    FSMHash;
-        if(FSMHash != 0) {string FSMpath;}
-        //byte    IBGarbage;
-    } //cEmGroupSetter
-    else{
-        long    THKHash;
-        if(THKHash != 0) {string THKpath;}
-        long    FSMHash;
-        if(FSMHash != 0) {string FSMpath;}
-        byte    IBGarbage;
-        THKAIFSM   thkaifsm<name="Think Table/AI FSM">;
-    }
+
+    structurePath callableStructures[4]<optimize=false>;
+
     long    FFFF1;
     long    unkn15; //if FFFF=FFFF 2 in arenas, 0 Rath
     char    NUL3;
