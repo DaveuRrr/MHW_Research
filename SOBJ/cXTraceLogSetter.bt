@@ -12,34 +12,60 @@
 //------------------------------------------------
 
 //------------------------------------------------
-// Terrain Point
+// cTerrianPoint
+//------------------------------------------------
 typedef struct {
-    byte    NUL0;
-    ushort  unkn0;
-    ushort  unkn1;
+    byte    mPriorityCheck; //Not Sure about a lot of it actually
+    int16   unkn0;
+    int16   unkn1;
     byte    NUL1;
-    long    unkn2;
-    byte    unkn3;
-    long    IBunkn1;
-    short   IBunkn2;
+    int16   unkn2;
+    int16   unkn3;
+    byte    unkn4;
+    int16   unkn5;
+    int16   unkn6;
+    int16   unkn7;
     long    IBNULL;
-} Terrain;
+    local string s;
+    SPrintf(s, "mPriorityCheck: %d [%d %d %d %d %d %d %d %d %d %d]", 
+        mPriorityCheck, unkn0, unkn1, NUL1, unkn2, unkn3, unkn4, unkn5, unkn6, unkn7, IBNULL);
+} cTerrainPoint;
 
 //------------------------------------------------
 // TraceLogSetter
+//------------------------------------------------
 typedef struct {
-    long    ReadData<bgcolor=0x800080,name="Read Data">;
-    string  Path<bgcolor=0x800080,name="File Path">;
-    uint32  unkn1;
-    uint32  unkn2;
-    float   unkn3;
+    Custom rTraceData<read=ReadCustom>;
+    uint32  TraceIndex;
+    uint32  unkn2; // mGroupID?
+    float   mTracePoint;
     long    unkn4;
-    long    unkn5;
+    long    mTimeStamp;
     long    unkn6;
     long    unkn7;
     long    unkn8;
-    byte    SOH1;
-    uint32  unkn9;
-    if (cType == "cKimenTraceLogSetter") {byte unkn10;}
-    if (cType == "cNpcTraceLogSetter") {uint32  unkn10;}
-} TraceLog;
+    byte    mIsNoOwnerCreate;
+    int32   unkn9;
+    if (setData.TypeName == "cKimenTraceLogSetter") {byte mIsAlwaysCreate;}
+    if (setData.TypeName == "cNpcTraceLogSetter") {int32  mNpcID;}
+    local string s;
+    SPrintf(s, "[%d %d %f %d %d %d %d %d %d %d]", 
+        TraceIndex, unkn2, mTracePoint, unkn4, mTimeStamp, unkn6, unkn7, unkn8, mIsNoOwnerCreate, unkn9); 
+} cTraceLogSetter;
+
+//------------------------------------------------
+// Display
+//------------------------------------------------
+string ReadTerrain(cTerrainPoint& r) {
+    string s;
+    SPrintf(s, "mPriorityCheck: %d [%d %d %d %d %d %d %d %d %d %d]", 
+        r.mPriorityCheck, r.unkn0, r.unkn1, r.NUL1, r.unkn2, r.unkn3, r.unkn4, r.unkn5, r.unkn6, r.unkn7, r.IBNULL);
+    return s;
+}
+
+string ReadTrace(cTraceLogSetter& r) {
+    string s;
+    SPrintf(s, "[%d %d %f %d %d %d %d %d %d %d]", 
+        r.TraceIndex, r.unkn2, r.mTracePoint, r.unkn4, r.mTimeStamp, r.unkn6, r.unkn7, r.unkn8, r.mIsNoOwnerCreate, r.unkn9);
+    return s;
+}

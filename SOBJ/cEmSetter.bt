@@ -12,43 +12,35 @@
 //------------------------------------------------
 
 //------------------------------------------------
-// THKPaths by Asterisk
-typedef struct{
-    long structureHash;
-    if (structureHash) string path; 
-}structurePath;
-
+// cEmSetter
 //------------------------------------------------
-// [EM] Boss Data
 typedef struct {
-    float   Size<name="Monster Size">;
-    float   unkn3;
-    long    unkn4;
-    long    mID<bgcolor=0x800080,name="Monster ID">;
-    long    Mode<bgcolor=0xFF0000,name="Monster Mode">;
-    uint32  fCnt<name="[AIFSM] Count">;
-    if (fCnt > 0) {Uunkn uunkn[fCnt]<read=ReadUunkn,name="[AIFSM] Data",optimize=false>;} //cEmGroupSetter
-    //uint32  six1; //Pre IB
-    uint32  six2;
-    Six six[six2]<read=ReadSix,name="Unknown SIX">; //cEmGroupSetter
-    long    uCnt<name="AIFSM Bool??">;
-
-    structurePath callableStructures[4]<optimize=false>;
-
-    long    FFFF1;
-    long    unkn15; //if FFFF=FFFF 2 in arenas, 0 Rath
-    char    NUL3;
-    long    sCnt<bgcolor=0x0000ff,name="[Zako] Count">;
-    if (sCnt > 0) {ZakoSpawn zakospawn[sCnt]<read=ReadZako,name="[Zako] Spawn",optimize=false>;} //cEmGroupSetter
-    uint32  lCnt<bgcolor=0x0000ff,name="[Boss] Count">;
-    if (lCnt > 0) {BossSpawn bossspawn[lCnt]<read=ReadSetTrace,name="[Boss] Spawn",optimize=false>;}
-    long  TraceBool<bgcolor=0x0000ff,name="Trace Bool">;
-    if (TraceBool == 1) {TraceSet ts<read=ReadSetTrace,name="Trace">;}
+    float   mMulScale;
+    float   mArrivalRadius;
+    int32   unkn1;
+    uint32  mEmID;
+    uint32  mEmSubID;
+    mDesireList Desire;
+    mTargetGroupIDList TargetGroupID;
+    mRepopSetList RepopSet;
+    Custom mprThinkTableList;
+    Custom mprFSM;
+    Custom mprMotionList;
+    uint32  unkn2;
+    int32   FFFF1;
+    int32   unkn15; //if FFFF=FFFF 2 in arenas, 0 Rath
+    byte    NUL3;
+    mProps  ZakoProps;
+    mPosData PosData;
+    mOverrideTraceData OverRideTraceData;
     uint32  NUL4[3];
-} EM;
+
+    local string s; SPrintf(s, "mEmID: %d", mEmID);
+} cEmSetter;
 
 //------------------------------------------------
-// [EMGroup] Zako Data
+// cEmGroupSetter
+//------------------------------------------------
 typedef struct {
     long    unkn2;
     long    unkn3;
@@ -57,81 +49,112 @@ typedef struct {
     float   unkn6;
     long    unkn7;
     float   unkn8;
-    uint32  fCnt;
-    if (fCnt > 0) {
-        AIFSM aifsm[fCnt]<name="[AIFSM] Count",optimize=false>;
-        //long IBAITHK;
-        //if(IBAITHK != 0){THKAIFSM thkaifsm;}
-        //else{uint32 unkn9[2];}
-    }
-    //uint32  six1;
-    uint32  six2;
-    Six six[six2]<read=ReadSix,name="Unknown SIX">; //cEmGroupSetter
-    long    uCnt;
-    if (uCnt > 0) {Uunkn uunkn[uCnt]<name="[AIFSM] Data",optimize=false>;} //cEmGroupSetter
-    long    unkn13;
-    if (unkn13 > 0) {Uunkn2 uunkn2[unkn13]<name="[AIFSM] Data",optimize=false>;} //cEmGroupSetter 
+    nEmGroupMemberInfo EmInfo;
+    mTargetGroupIDList TargetGroupID;
+    mDesireList Desire;
+    mRepopSetList RepopSet;
+    uint32  unkn9;
     long    FFFF1;
     long    unkn15;
     char    NUL3;
     if(NUL3 == -1) {uint32 NUL5;}
-    long    sCnt<bgcolor=0x0000ff,name="Zako Count">;
-    if (sCnt > 0) {ZakoSpawn zakospawn[sCnt]<read=ReadZako,name="[Zako] Spawn",optimize=false>;} //cEmGroupSetter
-    else{ZakoSpawn zakospawn<read=ReadZako,name="[Zako] Spawn",optimize=false>;}
+    mProps  ZakoProps;
     uint32  NUL4[3];
-} EMGroup;
+
+    local string s; SPrintf(s, "Count: %d", EmInfo.count);
+} cEmGroupSetter;
 
 //------------------------------------------------
-// [EMDesire] Loop Structs
+// cLifeSimDesireTargetForSetData
+//------------------------------------------------
 typedef struct {
-    long    IBsignature;
-    long    CoordType<bgcolor=0xff0000,name="Coord Type">;
-    float   aPos_X<bgcolor=0x00ff00,name="Point A    X">;
-    float   aPos_Y<bgcolor=0x00ff00,name="Point A    Y">;
-    float   aPos_Z<bgcolor=0x00ff00,name="Point A    Z">;
-    float   bPos_X<bgcolor=0x00ff00,name="Point B   X">;
-    float   bPos_Y<bgcolor=0x00ff00,name="Point B   Y">;
-    float   bPos_Z<bgcolor=0x00ff00,name="Point B   Z">;
-    long    Action<bgcolor=0xff0000,name="Action">;
-    uint32  unkn[3]<bgcolor=0xff0000>;
-} Route;
+    uint32  mEnumCRC<bgcolor=0x000000,format=hex>;
+    uint32  mDesireID;
+    Vector3 mPos<bgcolor=0x00FF00,read=ReadVector3>;
+    Vector3 mActionPos<bgcolor=0x0AA00,read=ReadVector3>;
+    int32   mActionID;
+    uint32  NULL[3];
+} cLifeSimDesireTargetForSetData;
 
 //------------------------------------------------
-// [EMDesire] Loop Structs
+// cLifeSimDesireTargetForSetData
+//------------------------------------------------
 typedef struct {
-    long    IBsignature;
-    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
-    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
-    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
-    float   unkn5<bgcolor=0x00ff00>;
-    float   unkn6<bgcolor=0x00ff00>;
-    float   unkn7<bgcolor=0x00ff00>;
-    float   unkn8<bgcolor=0x00ff00>;
-    float   unkn9<bgcolor=0x00ff00>;
-    float   unkn10<bgcolor=0x00ff00>;
-    float   unkn11<bgcolor=0x00ff00>;
-    uint32  unkn12<bgcolor=0x000000>;
-    byte    NULL<bgcolor=0x000000>;
-} Repop;
+    uint32 count;
+    cLifeSimDesireTargetForSetData setData[count]<bgcolor=0xAAAAAA,read=ReadDesireList,optimize=false>;
+} mDesireTargetList;
 
 //------------------------------------------------
-// [EMDesire]
+// cEmDesireSetter
+//------------------------------------------------
 typedef struct {
-    uint32  cCnt<bgcolor=0x0000ff,name="Coordinate Count">;
-    if (cType == "cEmDesireSetter"){Route r[cCnt]<read=ReadRoute,name="Route Coordinates",optimize=false>;}
-    if (cType == "cEmRepopSetter"){Repop p[cCnt]<read=ReadRepop,name="Repop Coordinates",optimize=false>;}
-} EMDesire;
+    mDesireTargetList targetList;
+    local string s; SPrintf(s, "Count: %d", targetList.count);
+} cEmDesireSetter;
 
+//------------------------------------------------
+// cEmRepopSetter
+//------------------------------------------------
+typedef struct {
+    uint32  mEnumCRC<bgcolor=0x000000,format=hex>;
+    Vector3 mPos<bgcolor=0x00FF00,read=ReadVector3>;
+    float   unkn0[7]<optimize=false>;
+    uint32  unkn1;
+    byte    NULL;
+} cEmRepopPointForSetData;
 
-string ReadRoute(Route& r) {
+//------------------------------------------------
+// cEmRepopSetter
+//------------------------------------------------
+typedef struct {
+    uint32 count;
+    cEmRepopPointForSetData setData[count]<bgcolor=0xAAAAAA,read=ReadRepopList,optimize=false>;
+} mRepopPointList;
+
+//------------------------------------------------
+// cEmRepopSetter
+//------------------------------------------------
+typedef struct {
+    mRepopPointList pointList;
+    local string s; SPrintf(s, "Count: %d", pointList.count);
+} cEmRepopSetter;
+
+//------------------------------------------------
+// Display
+//------------------------------------------------
+string ReadDesireList(cLifeSimDesireTargetForSetData& r) {
     string s;
-    SPrintf(s, "Action: %d \t A[X: %f \t Y: %f \t Z: %f] \t B[X: %f \t Y: %f \t Z: %f]", 
-            r.Action, r.aPos_X, r.aPos_Y, r.aPos_Z, r.bPos_X, r.bPos_Y, r.bPos_Z);
+    SPrintf(s, "ID: %d \t Action: %d \t mPos[x: %f \t y: %f \t z: %f] \t mActionPos[x: %f \t y: %f \t z: %f]",
+        r.mDesireID, r.mActionID, r.mPos.x, r.mPos.y, r.mPos.z, r.mActionPos.x, r.mActionPos.y, r.mActionPos.z);
     return s;
 }
 
-string ReadRepop(Repop& r) {
+string ReadRepopList(cEmRepopPointForSetData& r) {
     string s;
-    SPrintf(s, "[X: %f \t Y: %f \t Z: %f]", r.Pos_X, r.Pos_Y, r.Pos_Z);
+    SPrintf(s, "mPos[x: %f \t y: %d \t z: %d]", r.mPos.x, r.mPos.y, r.mPos.z);
+    return s;
+}
+
+string ReadEmSetter(cEmSetter& r) {
+    string s;
+    SPrintf(s, "mEmID: %d", r.mEmID);
+    return s;
+}
+
+string ReadEmGroup(cEmGroupSetter& r) {
+    string s;
+    SPrintf(s, "Count: %d", r.EmInfo.count);
+    return s;
+}
+
+string ReadDesireSetter(cEmDesireSetter& r) {
+    string s;
+    SPrintf(s, "Count: %d", r.targetList.count);
+    return s;
+}
+
+string ReadRepopSetter(cEmRepopSetter& r) {
+    string s;
+    SPrintf(s, "Count: %d", r.pointList.count);
     return s;
 }

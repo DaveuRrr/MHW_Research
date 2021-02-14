@@ -84,8 +84,11 @@
 //              cFishingFloatSetter, cPlJumpPos, cTerrainPoint, cTraceLogSetter, cVillageNpcSetter
 //
 //      Janurary 2020
-//              All previous Reversed Engineered structs were brought over from Vanilla
+//          - All previous Reversed Engineered structs were brought over from Vanilla
 //          and updated for Iceborne.
+//      February 2021
+//          - Added Asterisk's input for loading a custom think Table via Hash & path.
+//          - Mass update with Ando's DTI MHW Dumps for already mapped files.
 //------------------------------------------------
 
 // Header Information
@@ -98,18 +101,30 @@ typedef struct {
         long    SOHCnt;
         if (SOHCnt > 0){long    SOH[SOHCnt];}    //Only for Otomos
     }
-    uint32  ObjCnt<bgcolor=0x0000ff,name="Object Count">;
+    uint32  count<bgcolor=0x0000ff>;
 } Header;
 
 //------------------------------------------------
-// SOBJL File
+//Include cSetObject Templates
+//------------------------------------------------
+#include "cStructs.bt"
+#include "cSetAnimalArea.bt"
+#include "cSetFishArea.bt"
+#include "cEmSetter.bt"
+#include "cVillageNpcSetter.bt"
+#include "cPlJumpPos.bt"
+#include "cOtXSetter.bt"
+#include "cXTraceLogSetter.bt"
+
+
+//------------------------------------------------
+// rSetObject
+//------------------------------------------------
 typedef struct {
-    long    SOH<bgcolor=0xff0000,name="Start of Header">;
-    long    ind<bgcolor=0x0000ff,name="Index">;
-    long    rSetObjecth<bgcolor=0x800800,name="rSetObject">;
-    if (rSetObjecth == 0){}
-    else{string  pat<bgcolor=0x800080,name="Path">;}
-    uint32  NUL<name="Null">;
+    uint32  mAttr;
+    int32   mRefCount;
+    Custom  setObject<read=ReadCustom>;
+    uint32  NULL;
 } rSetObject;
 
 //------------------------------------------------
@@ -123,24 +138,18 @@ typedef struct {
     long    unknown;
 } rVillageSetSOBJ;
 
-//------------------------------------------------
-//Include cSetObject Templates
-#include "cStructs.bt"
-#include "cSetAnimalArea.bt"
-#include "cSetFishArea.bt"
-#include "cEmSetter.bt"
-#include "cVillageNpcSetter.bt"
-#include "cOtXSetter.bt"
-#include "cXTraceLogSetter.bt"
+
 
 //------------------------------------------------
 // FT File
 typedef struct {
-    long    IBsignature;
+    uint32  mEnumCRC; // CRC32 rSetObject::SettedData
     string  cType<bgcolor=0xFF0000,name="Command Type">;
     long    EOT0<hidden=true>;
-    Spawn   spawn<read=ReadSpawn,name="Spawn">;
-    string  oName<bgcolor=0xff0000,name="[Object] Name">;
+    Vector3 Pos<bgcolor=0x00FF00,read=ReadVector3>;
+    Vector3 Rot<bgcolor=0x00FF00,read=ReadVector3>;
+    Vector3 Scale<bgcolor=0x00FF00,read=ReadVector3>;
+    string  Asset<bgcolor=0xff0000>;
     uint32  unkn0;
     uint32  unkn1;
     byte    NULL;
@@ -150,99 +159,106 @@ typedef struct {
     local float y;
     local float z;
     
-    x = spawn.Pos_X;
-    y = spawn.Pos_Y;
-    z = spawn.Pos_Z;
-} FRDP;    
+    x = Pos.x;
+    y = Pos.x;
+    z = Pos.x;
+} cFtRoomDockPoint;    
 
 
 //------------------------------------------------
 // SOBJ
 typedef struct {
-    long    IBsignature;
-    string  cType<bgcolor=0xFF0000,name="Command Type">;
+    uint32  mEnumCRC; // CRC32 rSetObject::SettedData
+    string  TypeName<bgcolor=0xFF0000>;
     long    EOT0<hidden=true>;
-    Spawn   spawn<read=ReadSpawn,name="Spawn">;
-    string  oName<bgcolor=0xff0000,name="[Object] Name">;
-    oStruct ostruct<name="Odd Struct">;
-    string  pointA<bgcolor=0x800080,name="[Object] Pointer A / [Name] Folder">;
-    string  pointB<bgcolor=0x800080,name="[Object] Pointer B / [Name] Unknown">;
-    string  Nihongo<bgcolor=0x800080,name="Japanese Name?">;
-    string  EV<bgcolor=0x800080,name="EV ?">;
-    uint32  pCount<bgcolor=0x0000ff,name="[Object] Parameter Count">;
-    if (pCount != 0) {Parameters parameters[pCount]<read=ReadParam,name="Parameters",optimize=false>;}
-    byte    CD[64]<name="CD NULL">;
-    byte    gm<name="[Object] GM Extra">;
-    if(gm != 0){GM  gm<name="GM Unknown">;}
-    if (Strstr(cType, "cSetAnim") == 0){AnimalArea  aa<bgcolor=0x010010,name="cSetAnimalArea Data">;}
-    if (Strstr(cType, "cSetFish") == 0){FishArea    fa<bgcolor=0x010010,name="cSetFishArea Data">;}
-    if (Strstr(cType, "cVillage") == 0){NPC         npc<bgcolor=0x010010,name="cVillageNPCSetter Data">;}
-    if (Strstr(cType, "cQuestNp") == 0){NPC         npc<bgcolor=0x010010,name="cQuestNpcSetter Data">;}
-    if (Strstr(cType, "cEmDesir") == 0){EMDesire    emd<bgcolor=0x010010,name="cEmDesireSetter Data">;}
-    if (Strstr(cType, "cEmRepop") == 0){EMDesire    rep<bgcolor=0x010010,name="cEMRepopSetter">;}
-    if (Strstr(cType, "cEmSette") == 0){EM          em<bgcolor=0x010010,name="cEMSetter Data">;}
-    if (Strstr(cType, "cEmGroup") == 0){EMGroup     emg<bgcolor=0x010010,name="cEmGroupSetter Data ">;}
-    if (Strstr(cType, "cPlJumpP") == 0){PlJumpPos   pjp<bgcolor=0x010010,name="cPlJumpPos Data">;}
-    if (Strstr(cType, "cTerrain") == 0){Terrain     tp<bgcolor=0x010010,name="cTerrainPoint Data">;}
-    if (Strstr(cType, "cTraceLo") == 0){TraceLog    tl<bgcolor=0x010010,name="cTraceLogSetter Data">;}
-    if (Strstr(cType, "cKimenTr") == 0){TraceLog    tl<bgcolor=0x010010,name="cKimentTraceLogSetter">;}
-    if (Strstr(cType, "cNpcTrac") == 0){TraceLog    tl<bgcolor=0x010010,name="cNpcTraceLogSetter">;}
-    if (Strstr(cType, "cWildCat") == 0){TraceLog    tl<bgcolor=0x010010,name="cWildCatTraceLogSetter">;}
-    if (Strstr(cType, "cOtGroup") == 0){Group   otgrp<bgcolor=0x010010,name="cOtGroupSetter">;}
-    if (Strstr(cType, "cOtOtasuk") == 0){uint32 OtCnt; Otasuke  otsu[OtCnt]<bgcolor=0x010010,name="cOtOtasukeSetter",optimize=false>;}
-    if (Strstr(cType, "cOtRandom") == 0){uint32 OtCnt; Random   rando[OtCnt]<bgcolor=0x010010,name="cOtRandomSetter",optimize=false>; uint32 NULL;}
-    if (Strstr(cType, "cOtPosSet") == 0){uint32 OtID<bgcolor=0x800080,name="Otomo ID">;}
-    //if {Strstr(cType, "cPhotomo") == 0) {}
+    Vector3 Pos<bgcolor=0x00FF00,read=ReadVector3>;
+    Vector3 Rot<bgcolor=0x00FF00,read=ReadVector3>;
+    Vector3 Scale<bgcolor=0x00FF00,read=ReadVector3>;
+    string  Asset<bgcolor=0xff0000>;
+    if (TypeName == "cFtRoomDockPoint") { uint32 unkn[2]; byte NULL; }
+    else {
+        oStruct unknownStruct;
+        string  pointA<bgcolor=0x800080,name="[Object] Pointer A / [Name] Folder">;
+        string  pointB<bgcolor=0x800080,name="[Object] Pointer B / [Name] Unknown">;
+        string  Nihongo<bgcolor=0x800080,name="Japanese Name?">;
+        string  EV<bgcolor=0x800080,name="EV ?">;
+        mCoordParam param<bgcolor=0xAAAAAA>;
+        Matrix44  m;
+        byte    gm<name="[Object] GM Extra">;
+        if(gm != 0){GM  gm<name="GM Unknown">;}
+    }
     //Mostly for printing
-    local float x;
-    local float y;
-    local float z;
-    
-    x = spawn.Pos_X;
-    y = spawn.Pos_Y;
-    z = spawn.Pos_Z;
+    local string s;
+    if (TypeName == "cFtRoomDockPoint") { SPrintf(s, "Unkn0: %d \t Unkn1: %d \t Pos[x: %f \t y: %f \t z: %f",
+        unkn[0], unkn[1], Pos.x, Pos.y, Pos.z); }
+    else { SPrintf(s, Asset + " " + pointA + " " + pointB + Nihongo + EV + "Pos[x: %f \t y: %f \t z: %f",
+        Pos.x, Pos.y, Pos.z);
+    }
+} SettedData;
 
-    local int32 ID;
-    local int32 subID;
-    local int32 R;
-    local int32 C;
-    if (Strstr(cType, "cSetAnim") == 0){ID = aa.ID; subID = aa.subID; R = aa.rBool;}
-    if (Strstr(cType, "cSetFish") == 0){C = fa.vCnt; R = fa.rBool;}
-    if (Strstr(cType, "cPlJumpPos") == 0){ID = pjp.ID;}
-} SOBJ;
+//------------------------------------------------
+// Empty Struct with String
+//------------------------------------------------
+typedef struct {
+    local string s;
+} Empty;
+
+//------------------------------------------------
+// SOBJ
+//------------------------------------------------
+typedef struct {
+    SettedData setData<read=ReadSetData>;
+    // "cAssetBasicSetObject"
+    // "cFishingFloatSetter"
+    switch (setData.TypeName) {
+        case "cSetAnimalArea"           : cSetAnimalArea    setObjectParam<bgcolor=0x010010,read=ReadSetAnimal>;    break;
+        case "cSetFishArea"             : cSetFishArea      setObjectParam<bgcolor=0x010010,read=ReadSetFish>;      break;
+        case "cEmSetter"                : cEmSetter         setObjectParam<bgcolor=0x010010,read=ReadEmSetter>;     break;
+        case "cEmGroupSetter"           : cEmGroupSetter    setObjectParam<bgcolor=0x010010,read=ReadEmGroup>;      break;
+        case "cEmDesireSetter"          : cEmDesireSetter   setObjectParam<bgcolor=0x010010,read=ReadDesireSetter>; break;
+        case "cEmRepopSetter"           : cEmRepopSetter    setObjectParam<bgcolor=0x010010,read=ReadRepopSetter>;  break;
+        case "cPlJumpPos"               : cPlJumpPos        setObjectParam<bgcolor=0x010010,read=ReadPlJump>;       break;
+        case "cVillageNpcSetter"        : cVillageNpcSetter setObjectParam<bgcolor=0x010010,read=ReadNpcSetter>;    break;
+        case "cQuestNpcSetter"          : cVillageNpcSetter setObjectParam<bgcolor=0x010010,read=ReadNpcSetter>;    break;
+        case "cTerrainPoint"            : cTerrainPoint     setObjectParam<bgcolor=0x010010,read=ReadTerrain>;      break;
+        case "cTraceLogSetter"          : cTraceLogSetter   setObjectParam<bgcolor=0x010010,read=ReadTrace>;        break;
+        case "cKimenTraceLogSetter"     : cTraceLogSetter   setObjectParam<bgcolor=0x010010,read=ReadTrace>;        break;
+        case "cNpcTraceLogSetter"       : cTraceLogSetter   setObjectParam<bgcolor=0x010010,read=ReadTrace>;        break;
+        case "cWildCatTraceLogSetter"   : cTraceLogSetter   setObjectParam<bgcolor=0x010010,read=ReadTrace>;        break;
+        case "cOtRandomSetter"          : cOtRandomSetter   setObjectParam<bgcolor=0x010010,read=ReadRandom>;       break;
+        case "cOtGroupSetter"           : cOtGroupSetter    setObjectParam<bgcolor=0x010010,read=ReadOtGroup>;      break;
+        case "cOtOtasukeSetter"         : cOtOtasukeSetter  setObjectParam<bgcolor=0x010010,read=ReadOtasuke>;      break;
+        case "cOtPosSetter"             : cOtPosSetter      setObjectParam<bgcolor=0x010010,read=ReadOtPos>;        break;
+        default                         : Empty             setObjectParam;                                         break;
+    }
+} cSetObject;
 
 //------------------------------------------------
 //Read Strings
 string ReadHead(Header& r) {
     string s;
-    SPrintf(s, "Obj: %d", r.ObjCnt);
+    SPrintf(s, "Obj: %d", r.count);
     return s;
 }
 
 string ReadSOBJL(rSetObject& r) {
     string s;
-    if(r.rSetObjecth == 0){SPrintf(s, "Index: %d",r.ind);}
-    else{SPrintf(s, "Index: %d \t " + r.pat, r.ind);}
+    SPrintf(s, "Index: %d \t" + r.setObject.s, r.mRefCount);
     return s;
 }
 
-string ReadSOBJ(SOBJ& r){
-    string s;
-    if (r.cType == "cSetAnimalArea"){
-        SPrintf(s, "ID: %d \t sID: %d \t Rarity: %d \t [X: %f \t Y: %f \t Z: %f]", r.ID, r.subID, r.R, r.x, r.y, r.z);
-    }
-    if (r.cType == "cSetFishArea") {
-        SPrintf(s, "CT: %d \t Rarity: %d \t [X: %f \t Y: %f \t Z: %f]", r.C, r.R, r.x, r.y, r.z);
-    }
-    if (r.cType == "cAssetBasicSetObject") {
-        SPrintf(s, r.oName + "\t" + r.pointA + "\t" + r.pointB + "\t [X: %f \t Y: %f \t Z: %f]", r.x, r.y, r.z);
-    }
-    if (r.cType == "cVillageNpcSetter" || r.cType == "cQuestNpcSetter"){
-        SPrintf(s, r.oName + "\t" + r.pointA + "\t" + r.pointB + "\t [X: %f \t Y: %f \t Z: %f]", r.x, r.y, r.z);
-    }
-    if (r.cType == "cPlJumpPos") {
-        SPrintf(s, "ID: %d \t [X: %f \t Y: %f \t Z: %f]", r.ID, r.x, r.y, r.z);
-    }
+string ReadName(cSetObject& r){
+    string s = r.setData.TypeName;
+    return s;
+}
+
+string ReadSetData(SettedData& r) {
+    string s = r.s;
+    return s;
+}
+
+string ReadSOBJ(cSetObject& r) {
+    string s = r.setObjectParam.s + " " + r.setData.s;
     return s;
 }
 
@@ -252,77 +268,17 @@ string ReadVSS(rVillageSetSOBJ& r) {
     return s;
 }
  
-string ReadFRDP(FRDP& r){
+string ReadFRDP(cFtRoomDockPoint& r){
     string s;
     SPrintf(s, "u1: %d \t u2: %d \t [X: %f \t Y: %f \t Z: %f]", r.unkn0, r.unkn1, r.x, r.y, r.z);
     return s;
 }
+
 //------------------------------------------------
 //Display Info
 Header header<bgcolor=0x00ffff,read=ReadHead,name="Header">;
-
-local int i;
-local int p;
-local string cType;
-local int m;
-
-//Changes the if or case
-m = 0;
-
-for (i = 0; i < header.ObjCnt; i++) {
-    if (header.fType == 8){rVillageSetSOBJ  vss<name="rVillageSOBJ",read=ReadVSS>;}
-    if (header.fType == 10) {rSetObject  sobjl<name="rSetObject",read=ReadSOBJL>;}
-    if (m == 0) {
-        if (header.fType == 6451059) {
-            FSkip(4);
-            cType = ReadString(FTell());
-            switch (cType) {
-                case "cSetAnimalArea"           : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cSetAnimalArea">;            break;
-                case "cSetFishArea"             : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cSetFishArea">;              break;
-                case "cAssetBasicSetObject"     : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cAssetBasicObject">;         break;
-                case "cEmDesireSetter"          : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cEmDesireSetter">;           break;
-                case "cEmGroupSetter"           : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cEmGroupSetter">;            break;
-                case "cEmRepopSetter"           : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cEmRepopSetter">;            break;
-                case "cEmSetter"                : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cEmSetter">;                 break;
-                case "cFishingFloatSetter"      : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cFishingFloatSetter">;       break;
-                case "cPlJumpPos"               : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cPlJumpPos">;                break;
-                case "cOtGroupSetter"           : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cOtGroupSetter">;            break;
-                case "cOtOtasukeSetter"         : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cOtOtasukeSetter">;          break;
-                case "cOtRandomSetter"          : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cOtRandomSetter">;           break;
-                case "cOtPosSetter"             : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cOtPosSetter">;              break;
-                case "cTerrainPoint"            : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cTerrainPoint">;             break;
-                case "cTraceLogSetter"          : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cTraceLogSetter">;           break;
-                case "cKimenTraceLogSetter"     : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cKimenTraceLogSetter">;      break;
-                case "cNpcTraceLogSetter"       : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cNpcTraceLogSetter">;        break;
-                case "cWildCatTraceLogSetter"   : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cWildCatTraceLogSetter">;    break;
-                case "cVillageNpcSetter"        : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cVillageNpcSetter">;         break;
-                case "cQuestNpcSetter"          : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cQuestNpcSetter">;           break;
-                case "cPhotomoSetter"           : FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cPhotomoSetter">;            break;
-                case "cFtRoomDockPoint"         : FSkip(-4); FRDP frpd<read=ReadFRDP,name="cFtRoomDockPoint">;          break;
-            }
-        }
-    }
-    if (m == 1) {
-        if (header.fType == 6451059) {
-            FSkip(4);
-            cType = ReadString(FTell());
-            if (cType == "cSetAnimalArea"          ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cSetAnimalArea">;}
-            if (cType == "cSetFishArea"            ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cSetFishArea">;}
-            if (cType == "cAssetBasicSetObject"    ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cAssetBasicObject">;}
-            if (cType == "cEmDesireSetter"         ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cEmDesireSetter">;}
-            if (cType == "cEmGroupSetter"          ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cEmGroupSetter">;}
-            if (cType == "cEmRepopSetter"          ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cEmRepopSetter">;}
-            if (cType == "cEmSetter"               ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cEmSetter">;}
-            if (cType == "cFishingFloatSetter"     ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cFishingFloatSetter">;}
-            if (cType == "cPlJumpPos"              ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cPlJumpPos">;}
-            if (cType == "cTerrainPoint"           ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cTerrainPoint">;}
-            if (cType == "cTraceLogSetter"         ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cTraceLogSetter">;}
-            if (cType == "cKimenTraceLogSetter"    ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cKimenTraceLogSetter">;}
-            if (cType == "cNpcTraceLogSetter"      ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cNpcTraceLogSetter">;}
-            if (cType == "cWildCatTraceLogSetter"  ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cWildCatTraceLogSetter">;}
-            if (cType == "cVillageNpcSetter"       ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cVillageNpcSetter">;}
-            if (cType == "cQuestNpcSetter"         ){FSkip(-4); SOBJ sobj<read=ReadSOBJ,name="cQuestNpcSetter">;}
-            if (cType == "cFtRoomDockPoint"        ){FSkip(-4); FRDP frdp<read=ReadFRDP,name="cFtRoomDockPoint">;}
-        }
-    }
+switch (header.fType) {
+    case 8          : rVillageSetSOBJ   vss[header.count]<read=ReadVSS,optimize=false>;     break;
+    case 10         : rSetObject        sobjl[header.count]<read=ReadSOBJL,optimize=false>; break;
+    case 6451059    : cSetObject        sobj[header.count]<read=ReadSOBJ,name=ReadName,optimize=false>;   break;
 }

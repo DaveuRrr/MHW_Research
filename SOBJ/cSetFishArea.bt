@@ -12,17 +12,25 @@
 //------------------------------------------------
 
 //------------------------------------------------
-// [SetFishArea]
+// cSetFishArea
+//------------------------------------------------
 typedef struct {
-    uint32  vCnt<bgcolor=0x0000ff,name="Fish Variety">;
-    FishConfig   fc[vCnt]<read=ReadFishConfig,name="Fish Configuration",optimize=false>;
-    FishRadii   fr<name="Fish Radii">;
-    uint32  cCnt<bgcolor=0x0000ff,name="Fish Count">;
-    if (cCnt > 0) {FishCoord  fishcoord[cCnt]<name="Fish Coordinates",optimize=false>;}
-    byte    rBool<name="Rarity Bool">;
-    uint32  NULL;
-    if (rBool == 1) {
-        uint32  cRarity<bgcolor=0x0000ff,name="Rarity Count">;
-        Rarity rarity[cRarity]<read=ReadRarity,name="Rarity Configuration",optimize=false>;
-    }
-} FishArea;
+    mFishSetParams FishSet;
+    UseLikeArea useArea(0);
+    mPoints mBigFishFishingPos; //nAnimalPoints or mBigFishFishingPos
+    byte    mIsRare;
+    uint32  mIsRare1;
+    if (mIsRare == 1) { mRareSetDataArray RareData; }
+
+    local string s;
+    SPrintf(s, "FishSet: %d \t mIsRare: %d \t mIsRare: %d \t IsUseLikeArea: %d ", FishSet.count, mIsRare, mIsRare1, FishSet.FishSet[0].mIsUseLikeArea);
+} cSetFishArea;
+
+//------------------------------------------------
+// Display
+//------------------------------------------------
+string ReadSetFish(cSetFishArea& r) {
+    string s;
+    SPrintf(s, "FishSet: %d \t mIsRare: %d \t mIsRare: %d \t IsUseLikeArea: %d ", r.FishSet.count, r.mIsRare, r.mIsRare1, r.FishSet.FishSet[0].mIsUseLikeArea);
+    return s;
+}

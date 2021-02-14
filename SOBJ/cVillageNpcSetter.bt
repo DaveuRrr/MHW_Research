@@ -12,32 +12,39 @@
 //------------------------------------------------
 
 //------------------------------------------------
-// NPC Data
+// cVillageNpcSetter
+//------------------------------------------------
 typedef struct {
-    uint32  NpcID0<name="NPC ID?">; 
-    uint32  animationID<name="Animation ID">;
-    uint32  NPCID2<name="NPC ID?">;
+    uint32  mNpcID;
+    uint32  mMotionNo;
+    uint32  mMotionNoHex;
     uint32  unkn4;
     long    unkn5;
     byte    Flags[4]<bgcolor=0x00000ff,name="Bool?",optimize=false>;
     byte    NUL6[39];
     float   unkn6;
     long    unkn7;
-    byte    CloseUp<bgcolor=0x00000ff,name="Close Up Bool">;
-    byte    NUL7[6];
-    Camera  camera<name="NPC Camera">;
+    Camera  viewCamera;
     long    FFFF[3]<optimize=false>;
     // IB Stuff
     long    IBFF[3]<optimize=false>;
     uint32  unkn;
-    long    rAIFSM<bgcolor=0x800080,name="Read AI FSM">;
-    if (rAIFSM != 0){
-        char Path[]<bgcolor=0x800080,name="FSM Path">;
-    }
-    if (cType != "cQuestNpcSetter") {
-        char    FFFF2[4]<bgcolor=0x800080>;
+    Custom  mprFSM<read=ReadCustom>;
+    if (setData.TypeName != "cQuestNpcSetter") {
+        int32   mNpcNum<bgcolor=0x800080>;
         char    NUL11[2]<bgcolor=0x800080>;
     }
     else{short NULL;}
     //uint32 unkn16[4]; //Just a place holder till I can figure out what they are.
-} NPC;
+    local string s;
+    SPrintf(s, "mNPCID: %d \t Animation: %d \t Closeup: %d", mNpcID, mMotionNo, viewCamera.Flag);
+} cVillageNpcSetter;
+
+//------------------------------------------------
+// Display
+//------------------------------------------------
+string ReadNpcSetter(cVillageNpcSetter& r) {
+    string s;
+    SPrintf(s, "mNPCID: %d \t Animation: %d \t Closeup: %d", r.mNpcID, r.mMotionNo, r.viewCamera.Flag);
+    return s;
+}

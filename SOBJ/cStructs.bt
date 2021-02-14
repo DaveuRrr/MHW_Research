@@ -2,41 +2,87 @@
 //--- 010 Editor v9.0.2 Binary Template
 //
 //      File: 
-//   Authors: Dave uRrr
+//   Authors: Dave uRrr, AsteriskAmpersand
 //   Version: 
 //   Purpose: Adds all the mini structs needed for the bigger ones
 //  Category: 
 // File Mask: SOBJ.bt
 //  ID Bytes: 
 //   History: 
+//      02-10-2021: 
+//          Added a bunch of the DTI information on top of fixing
+//          cEmSetter.
 //------------------------------------------------
 
 //------------------------------------------------
-// Spawn
+// Data Type Information
+//------------------------------------------------
+//------------------------------------------------
+// Bool
 typedef struct {
-    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
-    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
-    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
-    float   Rot_X<bgcolor=0x00ff00,name="Rotation   X">;
-    float   Rot_Y<bgcolor=0x00ff00,name="Rotation   Y">;
-    float   Rot_Z<bgcolor=0x00ff00,name="Rotation   Z">;
-    float   Spn_X<bgcolor=0x00ff00,name="Spawn      X">;
-    float   Spn_Y<bgcolor=0x00ff00,name="Spawn      Y">;
-    float   Spn_Z<bgcolor=0x00ff00,name="Spawn      Z">;
+    byte    bool<bgcolor=0xff0000>;
+} Bool; //Type 3
+
+//------------------------------------------------
+// Int32
+typedef struct {
+    int32   value<bgcolor=0xff0000>;
+} Int32; //Type 4
+
+//------------------------------------------------
+// Float
+typedef struct {
+    float   value<bgcolor=0x00ff00>;
+} Float; // Type 6
+
+//------------------------------------------------
+// Vector3 no Null
+typedef struct {
+    float x;
+    float y;
+    float z;
+} Vector3;
+
+//------------------------------------------------
+// Vector4
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float w;
+} Vector4; // Type 8
+
+//------------------------------------------------
+// Vector4
+typedef struct {
+    Vector4    v4[4]<read=ReadVector4,optimize=false>;
+} Matrix44; // Type 9
+
+//------------------------------------------------
+// Class
+typedef struct {
+    byte    NUL0<hidden=true>;
+    uint32  value<bgcolor=0xff0000,name="Value">;
+    byte    NUL1<hidden=true>;
+} Class; // Type 13
+
+//------------------------------------------------
+// Custom hash Load Files by Asterisk 
+typedef struct {
     local string s;
-    SPrintf(s, "[pX: %f \t pY: %f \t pZ: %f] \t [rX: %f \t rY: %f \t rZ: %f]", 
-                Pos_X, Pos_Y, Pos_Z, Rot_X, Rot_Y, Rot_Z);
-} Spawn;
+    uint32 mEnumCRC<bgcolor=0x000000,format=hex>;
+    if (mEnumCRC !=0) { 
+        string path<bgcolor=0x80080>;
+        s = path;
+    }
+} Custom;
 
 //------------------------------------------------
 // OddStruct
 typedef struct {
     byte    SOH1;
-    byte    unkn0;
-    byte    unkn1;
-    byte    unkn2;
-    byte    unkn3;
-    if(cType == "cAssetBasicSetObject") {byte    unkn4[28];}
+    byte    unkn0[4];
+    if(TypeName == "cAssetBasicSetObject") {byte    unkn4[28];}
     else {byte  unkn4[13];}
     long    EOT1;
 } oStruct;
@@ -44,62 +90,26 @@ typedef struct {
 //------------------------------------------------
 // NPC Camera
 typedef struct {
-    float   Pos_X<bgcolor=0x00ff00,name="Position   X">;
-    float   Pos_Y<bgcolor=0x00ff00,name="Position   Y">;
-    float   Pos_Z<bgcolor=0x00ff00,name="Position   Z">;
-    uint32  NUL0<name="NULL">;
-    float   Rot_X<bgcolor=0x00ff00,name="Rotation  X">;
-    float   Rot_Y<bgcolor=0x00ff00,name="Rotation  Y">;
-    float   Rot_Z<bgcolor=0x00ff00,name="Rotation  Z">;
-    uint32  NUL1[3]<name="NULL">;
-    float   Spn_X<bgcolor=0x00ff00,name="Spawn     X">;
-    float   Spn_Y<bgcolor=0x00ff00,name="Spawn     Y">;
-    float   Spn_Z<bgcolor=0x00ff00,name="Spawn     Z">;
-    float   unkn8;
+    byte    Flag;
+    uint16  NULL[3];
+    Vector4 mPos<bgcolor=0x00FF00,read=ReadVector4>;
+    Vector4 mAngle<bgcolor=0x00AA00,read=ReadVector4>;
+    Vector4 mScale<bgcolor=0x006600,read=ReadVector4>;
+    float   unkn[2];
 } Camera;
 
 //------------------------------------------------
-// Parameter Data Types
-typedef struct {
-    byte    bool<bgcolor=0xff0000>;
-} dBool;        //dType = 3
-
-typedef struct {
-    int32   value<bgcolor=0xff0000,name="Value">;
-} dInt32;       //dType - 4
-
-typedef struct {
-    float   draw<bgcolor=0x00ff00,name="Draw Distance">;
-} dFloat;       //dType = 6
-
-typedef struct {
-    float   Pos_X<bgcolor=0x00ff00,name="Position   X">;
-    float   Pos_Y<bgcolor=0x00ff00,name="Position   Y">;
-    float   Pos_Z<bgcolor=0x00ff00,name="Position   Z">;
-    uint32  NUL<hidden=true>;
-} dVector4;     //dType = 8
-
-typedef struct {
-    dVector4    dvector4[4]<read=ReadVector4,name="Matrix 4x4",optimize=false>;
-} dMatrix4X4;    //dType = 9
-
-typedef struct {
-    byte    NUL0<hidden=true>;
-    uint32  value<bgcolor=0xff0000,name="Value">;
-    byte    NUL1<hidden=true>;
-} dClass;       //dType =13
-
+// mCoordParam
 //------------------------------------------------
-// Parameters
 typedef struct {
     uint32  dType<name="Data Type">;
     switch(dType) {
-        case 3  : dBool         dbool<read=ReadBool,name="Bool">;           break;
-        case 4  : dInt32        dint32<read=ReadInt32,name="Int32">;        break;
-        case 6  : dFloat        dfloatM<read=ReadFloat32,name="Float">;     break;
-        case 8  : dVector4      dvector4<read=ReadVector,name="Vector4">;   break;
-        case 9  : dMatrix4X4    dmatrix4x4<name="Matrix 4x4">;               break;
-        case 13 : dClass        dclass<read=ReadClass,name="Class">;        break;
+        case 3  : Bool         dbool<read=ReadBool>;        break;
+        case 4  : Int32        dint32<read=ReadInt32>;       break;
+        case 6  : Float        dfloatM<read=ReadFloat32>;   break;
+        case 8  : Vector4      dvector4<read=ReadVector>;   break;
+        case 9  : Matrix44     dmatrix44;                   break;
+        case 13 : Class        dclass<read=ReadClass>;      break;
     }
     string  PRM<bgcolor=0x800080,name="Parameter">;
     uint32  DTypev<bgcolor=0xff0000,name="Data Type ID">;
@@ -107,6 +117,14 @@ typedef struct {
     uint32  class<bgcolor=0xff0000,name="Value/Class">;
     byte    SOH[9]<hidden=true>;
 } Parameters;
+
+//------------------------------------------------
+// mCoordParam
+//------------------------------------------------
+typedef struct {
+    uint32 count;
+    Parameters parameter[count]<read=ReadParam,optimize=false>;
+} mCoordParam;
 
 //------------------------------------------------
 // Gimmick
@@ -117,253 +135,226 @@ typedef struct {
 } GM;
 
 //------------------------------------------------
-// [SetAnimalArea] Radii
-typedef struct {
-    char    NUL4<hidden=true>;
-    float   Range<name="Range",bgcolor=0x00ffff>; 
-    float   Set_Y<name="Set Height",bgcolor=0x00ffff>;
-    local int i<hidden=true>;
-    for (i = 0; i < 5; ++i) {
-        float   Radii_X<name="Radii         X \t",bgcolor=0x00ffff>;
-        float   Radii_Y<name="Radii         Y \t",bgcolor=0x00ffff>;
-        float   Radii_Z<name="Radii         Z \t",bgcolor=0x00ffff>;
-        uint32  NUL6<name="...............">;
-    }
-} Radii;
-
+// IsUseLikeArea
 //------------------------------------------------
-// [SetAnimalArea] Spawn Config
 typedef struct {
-    long    IBsignature;
-    local int i<hidden=true>;
-    for(i = 0; i < 12; i++){float   unkn<optimize=false>;}
-    float   Pos_X<name="Position   X",bgcolor=0x00ff00>;
-    float   Pos_Y<name="Position   Y",bgcolor=0x00ff00>;
-    float   Pos_Z<name="Position   Z",bgcolor=0x00ff00>;
-    float   unkn;
-    long    IBFFFF;
-} AnimalConfig;
-
-//------------------------------------------------
-// [SetAnimalArea] Unknown
-typedef struct {
-    long    SOH;
-    uint32  unkn3;
-    uint32  unkn4;
-    float   Pos_X<name="Position   X",bgcolor=0x00ff00>;
-    float   Pos_Y<name="Position   Y",bgcolor=0x00ff00>;
-    float   Pos_Z<name="Position   Z",bgcolor=0x00ff00>;
-    float   unkn7;
-    float   unkn8;
-    float   unkn9;
-    long    IBFFFF;
-} AnimalUnkn1;
-
-//------------------------------------------------
-// [SetAnimalArea] Rarity
-typedef struct {
-    long    IBsignature;
-    uint32  aCnt<name="Rarity Count">;
-    float   rarity<name="Spawn Rate">;
+    float   unkn0;
     byte    unkn1;
-    byte    unkn2;
-} Rarity;
+    float   range;
+    float   height;
+    Matrix44 AABB<bgcolor=0x00FFFF>;
+    Vector4 mPos<read=ReadVector4,bgcolor=0x00FF00>;
+} mShape;
 
 //------------------------------------------------
-// [SetAnimalArea] New IB struct
-typedef struct {
-    long    IBsignature;
-    uint32  unkn1;
-    float   unkn2;
-    uint64  unkn3;
-    short   unkn4;
-    float   unkn5;
-    float   unkn6;
-} IBstruct;
+// IsUseLikeArea
+//------------------------------------------------
+struct UseLikeArea(int use) {
+    mShape VisibleArea;
+    byte SOH;
+    if (use == 1) { uint32 NULL; }
+    else { uint64 NULL; }
+};
 
 //------------------------------------------------
-// [SetFishArea] New IB struct
+// //nAnimal::InitSetData
+//------------------------------------------------
 typedef struct {
-    long    IBsignature;
-    uint32  unkn0;
-    float   unkn1;
-    short   unkn2;
-} IBFstruct;
+    long    mEnumCRC<bgcolor=0x000000,format=hex>;
+    Matrix44 mMat<bgcolor=0x00AAAA>;
+    long    mEmAreaNo;
+} InitSetData; //nAnimal::InitSetData
 
 //------------------------------------------------
-// [SetFishArea] FishConfig
+// //nAnimal::InitSetData
+//------------------------------------------------
 typedef struct {
-    long    IBsignature;
-    uint32  fID<name="Great Fish ID">;
-    local float unknf<hidden=true>;
-    uint32  version<name="Version">;
-    uint32  fCnt<bgcolor=0x80080,name="Fish Count">;
-    uint32  unkn1;
+    uint32 count;
+    InitSetData initsetdata[count]<read=ReadInitSet,optimize=false>;
+} mInitDataArray;
 
-    // This breaks on st102_ec
-    byte    rBool<name="Rarity Bool">;
+//------------------------------------------------
+// nAnimal::cPoint
+//------------------------------------------------
+typedef struct {
+    long    mEnumCRC<bgcolor=0x000000,format=hex>;
+    uint32  mIndex;
+    uint32  mAttr;
+    Vector3 mPosition<bgcolor=0x00FF00,read=ReadVector3>;
+    Vector3 mNormal<bgcolor=0x00FF00,read=ReadVector3>;
+    int32   mEmAreaNo;
+} cPoint; //nAnimal::cPoint
+
+//------------------------------------------------
+// nAnimal::cPoint
+//------------------------------------------------
+typedef struct {
+    uint32 count;
+    cPoint point[count]<read=ReadcPoint,optimize=false>;
+} mPoints;
+
+//------------------------------------------------
+// nAnimal::RareSetData
+//------------------------------------------------
+typedef struct {
+    long    mEnumCRC<bgcolor=0x000000,format=hex>;
+    uint32  mTargetWeather;
+    float   mProbability;
+    byte    mStartTime;
+    byte    mEndTime;
+} RareSetData; //nAnimal::RareSetData
+
+//------------------------------------------------
+// nAnimal::RareSetData
+//------------------------------------------------
+typedef struct {
+    uint32 count;
+    RareSetData raresetdata[count]<read=ReadRarity,optimize=false>;
+} mRareSetDataArray;
+
+//------------------------------------------------
+// nAnimal::SizeSetData
+//------------------------------------------------
+typedef struct {
+    long    mEnumCRC<bgcolor=0x000000,format=hex>;
+    uint32  mTargetWeather;
+    float   mProbability;
+    byte    mStartTime;
+    byte    mEndTime;
+    float   mSizeProbability[4];
+} SizeSetData; //nAnimal::SizeSetData
+
+//------------------------------------------------
+// nAnimal::SizeSetData
+//------------------------------------------------
+typedef struct {
+    uint32 count;
+    SizeSetData sizesetdata[count]<optimize=false>;
+} mSizeSetDataArray;
+
+//------------------------------------------------
+// cSetFishArea::cFishSetParam
+//------------------------------------------------
+typedef struct {
+    long    mEnumCRC<bgcolor=0x000000,format=hex>;
+    uint32  mAnimalID;
+    uint32  mAnimalType;
+    uint32  mAnimalNum;
+    uint32  mSetVariation;
+    byte    mIsRare;
+    uint32  mIsRare1;
+    if (mIsRare == 1) { mRareSetDataArray RareData; }
+    if (mIsRare1 != 0 && mIsRare == 0) { mRareSetDataArray RareData; }
     uint32  Size;
-    if (rBool == 1) {
-        uint32  rCnt<bgcolor=0x0000ff,name="Rarity Count">;
-        Rarity rarity[rCnt]<read=ReadRarity,name="Rarity Configuration",optimize=false>;
-    }
-    else{
-        if (Size > 0) {
-            uint32  sCnt;
-            if (sCnt > 0) {IBFstruct ibfs[sCnt]<name="Unkn IB Struct",optimize=false>;}
-        }
-    }
-    // This breaks on st102_ec
-
-
-    //IB stuff
-    uint32  unkn3;
-    if (unkn3 > 0) {
-        uint32  sCnt;
-        if (sCnt > 0) {IBstruct ibs[sCnt]<name="Unkn IB Struct",optimize=false>;}
-    }
-    //IB Stuff
-
-    byte    SOH2;
-    if (SOH2 == 0) {}
-    else{
-        float   Spawn0;
-        if (Spawn0 == 1) {
-            Radii radii<name="Fish Radii">;
-            uint32  SOH3;
-            byte    NULL;
-        }
-        else {
-            float   Spawn1;
-            short   unkn6;
-            char    SOH3;
-            float   Spawn2;
-            Radii radii<name="Fish Radii">;
-        }
-    }
-} FishConfig;
+    if (Size != 0) {mSizeSetDataArray SizeData; }
+    byte    mIsUseLikeArea;
+    if (mIsUseLikeArea != 0) {UseLikeArea useArea(mIsUseLikeArea);}
+    Printf("mIsUseLikeArea %d ", mIsUseLikeArea);
+} cFishSetParam; //cSetFishArea::cFishSetParam
 
 //------------------------------------------------
-// [SetFishArea] Radii
+// cSetFishArea::cFishSetParam
+//------------------------------------------------
 typedef struct {
-    char    SOH;
-    if (SOH ==0) {FSkip(-1);}
-    else {uint32  unkn0;}
+    uint32 count;
+    cFishSetParam FishSet[count]<read=ReadFishSet,optimize=false>;
+} mFishSetParams;
+
+//------------------------------------------------
+// cLifeSimTargetDesireSetData
+//------------------------------------------------
+typedef struct {
+    uint32 mEnumCRC<bgcolor=0x000000,format=hex>;
+    uint32 index;
+    uint32 unkn;
+} mTagSetData;
+
+//------------------------------------------------
+// cLifeSimTargetDesireSetData
+//------------------------------------------------
+typedef struct {
+    uint32  mEnumCRC<bgcolor=0x000000,format=hex>;
+    mTagSetData TagSet; //Needs review
+    uint32  mAttr;
+    int32   mStoryCheck;
+} cLifeSimTargetDesireSetData; //AIFSM
+
+//------------------------------------------------
+// cLifeSimTargetDesireSetData
+//------------------------------------------------
+typedef struct {
+    uint32 count;
+    cLifeSimTargetDesireSetData lifesim[count]<read=ReadLSTDSD,optimize=false>;
+} mDesireList;
+
+//------------------------------------------------
+// nSetLinker::cTypedTagForSetData Type:Repop
+//------------------------------------------------
+typedef struct {
+    uint32  mEnumCRC<bgcolor=0x000000,format=hex>;
+    uint32  mTgtCrc;
+    uint32  mTgtIndex;
+    uint32  mTgtType;
+    //uint32  unkn;
+} cTypedTagForSetData; //nSetLinker::cTypedTagForSetData
+
+//------------------------------------------------
+// nSetLinker::cTypedTagForSetData Type:Repop
+//------------------------------------------------
+typedef struct {
+    uint32 count;
+    cTypedTagForSetData TypeTag[count]<optimize=false>;
+} mRepopSetList;
+
+//------------------------------------------------
+// [cEmSetter] Loop Structs
+typedef struct {
+    uint32  group;
+    float   unkn0;
     float   unkn1;
-    if (unkn1 == 0) {uint32  NUL;}
-    else{Radii radii<name="Fish Radii">;}
-    char    SOH1;
-    uint64  NUL1;
-} FishRadii;
+} TargetGroup;
 
 //------------------------------------------------
-// [SetFishArea] Coordinates
+// nEmGroup::MemberInfo
+//------------------------------------------------
 typedef struct {
-    long    IBsignature;
-    local int i<hidden=true>;
-    for (i = 0; i < 8 ; ++i) {float   unkn;}
-    long    IBunkn;
-} FishCoord;
+    uint32 count;
+    TargetGroup targetgroup[count]<read=ReadTargetGroup,optimize=false>;
+} mTargetGroupIDList;
 
 //------------------------------------------------
-// [cEmSetter] Loop Structs
+// nEmGroup::MemberInfo
+//------------------------------------------------
 typedef struct {
-    long    IBsignature;
-    long    IDcount;
-    long    unkn1;
-    long    unkn2;
-    long    unkn3;
-    long    unkn4;
-} Uunkn; //AIFSM
+    long    mEnumCRC<bgcolor=0x000000,format=hex>;
+    uint32  mID<bgcolor=0xff0000>;
+    Vector3 mPos<bgcolor=0x00FF00,read=ReadVector3>;
+    Vector3 mAng<bgcolor=0x00AA00,read=ReadVector3>;
+    float   mMulScale<bgcolor=0x00FF00>;
+    byte    mStartFSM;
+    Custom mprFSM;
+    Custom mprMostionList;
+    Custom mprThinkTableList;
+    uint32  mSubID<bgcolor=0xff0000>; //Status / Variant
+    string Tag0;
+    string Tag1;
+    string Tag2;
+    string Tag3;
+} MemberInfo; //nEmGroup::MemberInfo
 
 //------------------------------------------------
-// [cEmSetter] Loop Structs
-typedef struct {
-    long    IBsignature;
-    long    unkn0;
-    long    unkn1;
-    long    unkn2;
-    long    unkn3;
-} Uunkn2; //AIFSM
-
+// nEmGroup::MemberInfo
 //------------------------------------------------
-// [cEmSetter] Loop Structs
 typedef struct {
-    long    ID;
-    float   unkn1;
-    float   unkn2;
-} Six;
-
-//------------------------------------------------
-// [cEmGroupSetter] Loop Structs
-typedef struct {
-    long    IBSignature;
-    uint32  unkn0<bgcolor=0xff0000>;
-    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
-    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
-    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
-    float   Rot_X<bgcolor=0x00ff00,name="Rotation   X">;
-    float   Rot_Y<bgcolor=0x00ff00,name="Rotation   Y">;
-    float   Rot_Z<bgcolor=0x00ff00,name="Rotation   Z">;
-    float   Spn_X<bgcolor=0x00ff00,name="Spawn">;
-    long    AI<bgcolor=0x800080,name="Read AIFSM">;
-    string  aPath<bgcolor=0x800080,name="Path">;
-    if (AI != 0) {
-       long    Thk<bgcolor=0x80080>;
-       string    tPath<bgcolor=0x800080,name="Path">;
-    }
-    //if (AI != 0) {string    aPath<bgcolor=0x800080,name="Path">;}
-    uint64  NUL0;
-
-    //if (Thk != 0) {string    tPath<bgcolor=0x800080,name="Path">;}
-    uint32  variant<bgcolor=0xff0000,name="Status / Variant">;
-    string    zako<bgcolor=0x800080>;
-    byte    unkn1[3];
-} AIFSM;
-
-//------------------------------------------------
-// [cEmSetter] Loop Structs
-typedef struct {
-    long    SOH;
-    //This IF might need to be removed or seperated only for EMS files
-    if (SOH == 0) {
-        char    Thk[]<bgcolor=0x800080,name="Think Table">;
-        if (Thk != ""){char    path[]<bgcolor=0x800080,name="Path">;}
-        char    AI[]<bgcolor=0x800080,name="Read AIFSM">;
-        if (AI != "") {char    aPath[]<bgcolor=0x800080,name="Path">;}
-        byte    NUL[5];
-    }
-    //cEmSetter only I believe
-    else {
-        long    unkn1;
-        long    unkn2;
-        if (unkn2 == 0){byte NULL;}
-        uint32  unkn3;
-        uint32  unkn4;
-        if(unkn4 != 0){byte    NUL0;}
-        long    AI<bgcolor=0x800080,name="Read AIFSM">;
-        if (AI != 0) {string    aPath<bgcolor=0x800080,name="Path">;}
-        //byte    NUL[4];
-    }
-} ThinkTable;
-
-//------------------------------------------------
-// [cEmSetter] Loop Structs
-typedef struct {
-        char    Thk[]<bgcolor=0x800080,name="Think Table">;
-        if (Thk != ""){char    path[]<bgcolor=0x800080,name="Path">;}
-        char    AI[]<bgcolor=0x800080,name="Read AIFSM">;
-        if (AI != "") {char    aPath[]<bgcolor=0x800080,name="Path">;}
-        byte    NUL;    //DeathCream noticed it was a byte + long
-        long    unkn;
-} THKAIFSM;
+    uint32 count;
+    MemberInfo memberinfo[count]<optimize=false>;
+} nEmGroupMemberInfo;
 
 //------------------------------------------------
 // [cEmSetter] Zako Spawn
+//------------------------------------------------
 typedef struct {
-    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
-    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
-    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
+    Vector3 mPos<bgcolor=0x00FF00,read=ReadVector3>;
     float   unkn16;
     float   unkn17;
     long    FFFF2;
@@ -371,78 +362,92 @@ typedef struct {
 } ZakoSpawn;
 
 //------------------------------------------------
-// [cEmSetter] Boss Spawn
+// mProps possibe?
+//------------------------------------------------
 typedef struct {
-    long    IBsignature;
-    float   Pos_X<bgcolor=0x00ff00,name="Position    X">;
-    float   Pos_Y<bgcolor=0x00ff00,name="Position    Y">;
-    float   Pos_Z<bgcolor=0x00ff00,name="Position    Z">;
-    float   unkn<bgcolor=0x00ff00>;
-    long    cmd<bgcolor=0x800080,name="rSetObject">;
-    if (cmd != 0){string path<bgcolor=0x800080,name="Path">;}
-} BossSpawn;
+    uint32 count;
+    ZakoSpawn zako[count]<optimize=false>;
+} mProps; //ZakoSpawn...
 
 //------------------------------------------------
-// [cEmSetter] Boss Trace
+// cEmSetter::PosSetData
+//------------------------------------------------
 typedef struct {
-    long    IBsignature;
+    long    mEnumCRC<bgcolor=0x000000,format=hex>;
+    Vector3 mPos<bgcolor=0x00AA00>;
+    float   mProb<bgcolor=0x00FF00>;
+    Custom  mpTraceLogSetRes;
+} PosSetData;
+
+//------------------------------------------------
+// cEmSetter::PosSetData
+//------------------------------------------------
+typedef struct {
+    uint32 count;
+    PosSetData SetData[count]<read=ReadPosSetData,optimize=false>;
+} mPosData;
+
+//------------------------------------------------
+// cEmSetter::OverrideTraceData Maybe?
+//------------------------------------------------
+typedef struct {
+    long    mEnumCRC<bgcolor=0x000000,format=hex>;
     long    FFFF1;
     long    FFFF2<bgcolor=0xff0000>;
-    long    cmd<bgcolor=0x800080,name="rSetObject">;
-    if (cmd != 0){string path<bgcolor=0x800080,name="Path">;}
-} TraceSet;
+    Custom  mpTraceLogSetRes; 
+} TraceData; // cEmSetter::OverrideTraceData Maybe?
 
 //------------------------------------------------
-// [cPlJumpPos] Spawn Coordinates
-typedef struct {
-    float x;
-    float y;
-    float z;
-} PlVector;
-
+// cEmSetter::OverrideTraceData Maybe?
 //------------------------------------------------
-// Player Spawn Data
 typedef struct {
-    uint64  ID;
-    PlVector plv[15]<bgcolor=0x000AA00,read=ReadPlVector,name="Player Coordinates",optimize=false>;
-} PlJumpPos;
+    uint32 count;
+    TraceData tracedata[count]<optimize=false>;
+} mOverrideTraceData;
 
 //------------------------------------------------
 //Read Strings
-string ReadSpawn(Spawn& r) {
+//------------------------------------------------
+string ReadCustom(Custom& r) {
     string s;
-    s = r.s;
+    if (r.mEnumCRC != 0) {s = r.path;}
     return s;
 }
 
-string ReadBool(dBool& r) {
+string ReadBool(Bool& r) {
     string s;
     SPrintf(s, "Value: %d", r.bool);
     return s;
 }
 
-string ReadInt32(dInt32& r) {
+string ReadInt32(Int32& r) {
     string s;
     SPrintf(s, "Value: %d", r.value);
     return s;
 }
 
-string ReadClass(dClass& r) {
+string ReadClass(Class& r) {
     string s;
     SPrintf(s, "Value: %d", r.value);
     return s;
 }
 
-string ReadFloat32(dFloat& r) {
+string ReadFloat32(Float& r) {
     string s;
     SPrintf(s, "Value: %f", r.draw);
     return s;
 
 }
 
-string ReadVector4(dVector4& r) {
+string ReadVector3(Vector3& r) {
     string s;
-    SPrintf(s, "X: %f \t Y: %f \t Z: %f", r.Pos_X, r.Pos_Y, r.Pos_Z);
+    SPrintf(s, "X: %f \t Y: %f \t Z: %f", r.x, r.y, r.z);
+    return s;
+}
+
+string ReadVector4(Vector4& r) {
+    string s;
+    SPrintf(s, "X: %f \t Y: %f \t Z: %f \t W: %f", r.x, r.y, r.z, r.w);
     return s;
 }
 
@@ -452,69 +457,52 @@ string ReadParam(Parameters& r) {
     return s;
 }
 
-string ReadSix(Six& r) {
+string ReadTargetGroup(TargetGroup& r) {
     string s;
-    SPrintf(s, "%d %d %d", r.ID, r.unkn1, r.unkn2);
+    SPrintf(s, "ID: %d \t %d \t %d", r.group, r.unkn0, r.unkn1);
     return s;
 }
 
-string ReadUunkn(Uunkn& r) {
+string ReadLSTDSD(cLifeSimTargetDesireSetData& r) {
     string s;
-    SPrintf(s, "%d %d %d %d", r.IDcount, r.unkn1, r.unkn2, r.unkn3);
+    SPrintf(s, "Tag: %d \t %d \t Attr: %d \t StoryCheck: %d", r.TagSet.index, r.TagSet.unkn, r.mAttr, r.mStoryCheck);
+    return s;
+} //cLifeSimTargetDesireSetData
+
+string ReadPosSetData(PosSetData& r) {
+    string s;
+    SPrintf(s, "[X: %f \t Y: %f \t Z: %f] \t Prob: %d \t Path: %s", r.mPos.x, r.mPos.y, r.mPos.z, r.mProb, r.mpTraceLogSetRes.s);
     return s;
 }
 
 string ReadZako(ZakoSpawn& r) {
     string s;
-    SPrintf(s, "Unkn: %d \t [X: %f \t Y: %f \t Z: %f]", r.unkn16, r.Pos_X, r.Pos_Y, r.Pos_Z);
+    SPrintf(s, "[%d %d] \t [X: %f \t Y: %f \t Z: %f]", r.unkn16, r.unkn17, r.mPos.x, r.mPos.y, r.mPos.z);
     return s;
 }
 
-string ReadSetTrace(BossSpawn& r) {
+string ReadInitSet(InitSetData& r) {
     string s;
-    SPrintf(s, "Spawn: %f \t [X: %f \t Y: %f \t Z: %f]", r.unkn, r.Pos_Z, r.Pos_Y, r.Pos_Z);
+    SPrintf(s, "Matrix[4] [X: %f \t Y: %f \t Z: %f]", r.mMat.v4[3].x, r.mMat.v4[3].y, r.mMat.v4[3].z);
     return s;
 }
 
-string ReadFishConfig(FishConfig& f) {
+string ReadcPoint(cPoint& r) {
     string s;
-    string v;
-    uint32  Fish;
-    if (f.fID == 0) {
-        Fish = f.fishID;
-        v = "Regular";
-    }
-    else{
-        Fish = f.fID;
-        v = "Greater";
-    }
-    SPrintf(s, "Ver: " + v + "\t ID: %d \t Count: %d \t Rarity: %d", Fish, f.fCnt, f.rBool);
+    SPrintf(s, "IX: %d \t Attr: %d \t [X: %f \t Y: %f \t Z: %f] EmArea: %d", 
+        r.mIndex, r.mAttr, r.mPosition.x, r.mPosition.y, r.mPosition.z, r.mEmAreaNo);
+    return s;
+}
+
+string ReadFishSet(cFishSetParam& r) {
+    string s;
+    SPrintf(s, "ID: %d \t Type: %d \t Count: %d \t Rarity: %d \t IsLikeArea: %d", 
+        r.mAnimalID, r.mAnimalType, r.mAnimalNum, r.mIsRare, r.mIsUseLikeArea);
     return s; 
 }
 
-string ReadRarity(Rarity& r) {
-    string i;
-    string p;
+string ReadRarity(RareSetData& r) {
     string s;
-    SPrintf(s, "Unkn: %d \t Spawn Rate: %f", r.aCnt, r.rarity);
+    SPrintf(s, "Weather: %d \t Rate: %f \t S: %d \t E: %d", r.mTargetWeather, r.mProbability, r.mStartTime, r.mEndTime);
     return s;
 }
-
-string ReadPlVector(PlVector& r) {
-    string s;
-    SPrintf(s, "[X: %d \t Y: %d \t Z: %d]", r.x, r.y, r.z);
-    return s;
-}
-
-//string ReadRoute(Route& r) {
-//    string s;
-//    SPrintf(s, "Action: %d \t A[X: %f \t Y: %f \t Z: %f] \t B[X: %f \t Y: %f \t Z: %f]", 
-//            r.Action, r.aPos_X, r.aPos_Y, r.aPos_Z, r.bPos_X, r.bPos_Y, r.bPos_Z);
-//    return s;
-//}
-//
-//string ReadRepop(Repop& r) {
-//    string s;
-//    SPrintf(s, "[X: %f \t Y: %f \t Z: %f]", r.Pos_X, r.Pos_Y, r.Pos_Z);
-//    return s;
-//}

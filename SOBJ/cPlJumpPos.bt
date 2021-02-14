@@ -12,8 +12,20 @@
 //------------------------------------------------
 
 //------------------------------------------------
-// Player Spawn Data
+// cPlJumpPos
+//------------------------------------------------
 typedef struct {
-    uint64      ID;
-    PlVector plv[15]<bgcolor=0x000AA00,read=ReadPlVector,name="Player Coordinates",optimize=false>;
-} PlJumpPos;
+    uint32  mPosID;
+    uint32  mStoryNo;
+    Vector3 mPlPos[15]<bgcolor=0x00FF00,read=ReadVector3,optimize=false>;
+    local string s; SPrintf(s, "mPosID: %d \t mStoryNo: %d \t mPlPos[0][x: %f \t y: %f \t z: %f]", mPosID, mStoryNo, mPlPos[0].x, mPlPos[0].y, mPlPos[0].z);
+} cPlJumpPos;
+
+//------------------------------------------------
+// Display
+//------------------------------------------------
+string ReadPlJump(cPlJumpPos& r) {
+    string s;
+    SPrintf(s, "mPosID: %d \t mStoryNo: %d \t mPlPos[0][x: %f \t y: %f \t z: %f]", r.mPosID, r.mStoryNo, r.mPlPos.x, r.mPlPos.y, r.mPlPos.z);
+    return s;
+}
