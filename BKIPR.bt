@@ -1,0 +1,233 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.2 Binary Template
+//
+//      File: 
+//   Authors: Dave uRrr & Vuze & Asterisk
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.BKIPR / *.IPR
+//  ID Bytes: 
+//   History:
+//      March 5th, 2020
+//          Asset Struct was updated after discovering 3 possible paths, 4 paths were added.
+//          Each path is read by the Offset of each entry.
+//          
+//          Asterisk: When the 2nd to 4th path are not reused but the first is then it doesn't update the further offset 
+//          and copies the previous values and if the main path is not updated it points to the previous path entry 
+//          but still has the path in the file.
+//
+//          The Compiler is still reading at a 32 bit registry.
+//
+//      March 20th, 2023
+//          Rebuilding Template to represent the BKIPR as there is more data to uncover than normal IPRs
+//
+//------------------------------------------------
+
+//------------------------------------------------
+// Custom mInstancePlacementResPtr
+//------------------------------------------------
+struct Custom(int Offset)
+{
+    local int position<hidden=true> = FTell();
+    FSeek(Offset);
+    string InstancePlacementResource;
+    FSeek(position);
+};
+
+//------------------------------------------------
+// Vector3
+//------------------------------------------------
+typedef struct 
+{
+    float x;
+    float y;
+    float z;
+} Vector3;
+
+//------------------------------------------------
+// Vector4
+//------------------------------------------------
+typedef struct 
+{
+    float x;
+    float y;
+    float z;
+    float w;
+} Vector4;
+
+//------------------------------------------------
+// Header
+//------------------------------------------------
+typedef struct 
+{
+    char FileType[4];
+    long Version<format=hex>;
+    byte NUL[56];
+    uint64 InstancePlacementOffset;
+    uint64 InstancePlacementCount;
+    if (FileType == "bipr"){
+        uint64 InstancePlacementXMLOffset;
+        uint64 InstancePlacementXMLCount;
+    }   
+} Header;
+
+//------------------------------------------------
+// BindBaseModelInstance
+//------------------------------------------------
+typedef struct 
+{
+    Vector3 mPos<bgcolor=0x00AA00,read=ReadVector3,optimize=false>;
+    Vector3 mScale<bgcolor=0x00a5ff,read=ReadVector3,optimize=false>;
+    Vector4 mQuat<bgcolor=0x00ff00,read=ReadVector4,optimize=false>;
+    Vector4 mAngle<bgcolor=0x800800,read=ReadVector4,optimize=false>;
+    float UnknknownArray[4]; //hfloat UnknownArray[32];
+    int32 unkn0;
+    int32 unkn1;
+    uint16 InstanceIndex;
+    hfloat unkn2;
+    uint16 unkn3[4];
+    uint32 unkn4;
+} BindBaseModelInstance;
+
+//------------------------------------------------
+// BindBaseModel
+//------------------------------------------------
+struct BindBaseModel(int Offset, int Count)
+{
+    local int position<hidden=true> = FTell();
+    FSeek(Offset);
+    BindBaseModelInstance instance[Count]<read=ReadBindBaseModelInstance,optimize=false>;
+    FSeek(position);
+};
+
+//------------------------------------------------
+// BindBakeInstancePlacement
+//------------------------------------------------
+typedef struct
+{
+    int32 unkn0;
+    int32 unkn1;
+    int32 unkn2;
+    int32 unkn3;
+} BindBakeInstancePlacement;
+
+//------------------------------------------------
+// BakeInstancePlacement
+//------------------------------------------------
+struct BakeInstancePlacement(int Offset, int Count)
+{
+    local int position<hidden=true> = FTell();
+    FSeek(Offset);
+    BindBakeInstancePlacement bind[Count]<optimize=false>;
+    FSeek(position);
+};
+
+//------------------------------------------------
+// InstancePlacementEntry
+//------------------------------------------------
+typedef struct 
+{
+    uint32 NULL[8]<bgcolor=0x660000>;
+    uint64 mInstancePlacementResPtr[4]<optimize=false>;
+    uint64 unkn0; //Might be an offset?
+    uint64 unkn1;
+    uint64 BindBaseModelInstanceOffset;
+    uint64 BindBaseModelInstanceCount;
+    uint64 BakeInstancePlacementOffset;
+    uint64 BakeInstancePlacementCount;
+    uint64 unkn2<bgcolor=0x00AA00>;
+    uint64 unkn3<bgcolor=0x00AA00>;
+} InstancePlacementEntry;
+
+//------------------------------------------------
+// InstancePlacement
+//------------------------------------------------
+typedef struct 
+{
+    InstancePlacementEntry entry<bgcolor=0xffff00,optimize=false>;
+    Custom mInstancePlacementResPtr(entry.mInstancePlacementResPtr[0])<bgcolor=0xFF88FF,read=ReadCustom,optimize=false>;
+    Custom mInstancePlacementResPtr(entry.mInstancePlacementResPtr[1])<bgcolor=0xFF88FF,read=ReadCustom,optimize=false>;
+    Custom mInstancePlacementResPtr(entry.mInstancePlacementResPtr[2])<bgcolor=0xFF88FF,read=ReadCustom,optimize=false>;
+    Custom mInstancePlacementResPtr(entry.mInstancePlacementResPtr[3])<bgcolor=0xFF88FF,read=ReadCustom,optimize=false>;
+    BindBaseModel instances(entry.BindBaseModelInstanceOffset, entry.BindBaseModelInstanceCount);
+    BakeInstancePlacement baked(entry.BakeInstancePlacementOffset, entry.BakeInstancePlacementCount);
+} InstancePlacement;
+
+//------------------------------------------------
+// rInstancePlacement Group
+//------------------------------------------------
+struct rInstancePlacement(int Count)
+{
+    InstancePlacement ipr[header.InstancePlacementCount]<optimize=false>;
+};
+
+//------------------------------------------------
+// InstancePlacement Path
+//------------------------------------------------
+typedef struct
+{
+    uint64 mEnumCRCOffset;
+    uint64 mPathOffset;
+    uint64 unkn;
+    Custom mEnumCRC(mEnumCRCOffset)<bgcolor=0xFF88FF,read=ReadCustom,optimize=false>;
+    Custom mPath(mPathOffset)<bgcolor=0xFF88FF,read=ReadCustom,optimize=false>;
+} InstancePlacementPath;
+
+//------------------------------------------------
+// InstancePlacement XML
+//------------------------------------------------
+struct rInstancePlacementXML(int Count)
+{
+    InstancePlacementPath xml[Count]<bgcolor=0x0000AA,optimize=false>;
+};
+//------------------------------------------------
+// Read InstancePlacementEntry
+//------------------------------------------------
+string ReadCustom(Custom& r) 
+{
+    string s = r.InstancePlacementResource;
+    //SPrintf(s, "");
+    return s;
+};
+
+//------------------------------------------------
+// Read Vector3
+//------------------------------------------------
+string ReadVector3(Vector3& r) 
+{
+    string s;
+    SPrintf(s, "[X: %f  Y: %f  Z: %f]", r.x, r.y, r.z);
+    return s;
+};
+
+//------------------------------------------------
+// Read Vector4
+//------------------------------------------------
+string ReadVector4(Vector4& r) 
+{
+    string s;
+    SPrintf(s, "[X: %f  Y: %f  Z: %f  W: %f]", r.x, r.y, r.z, r.w);
+    return s;
+};
+
+//------------------------------------------------
+// Read Vector4
+//------------------------------------------------
+string ReadBindBaseModelInstance(BindBaseModelInstance& r)
+{
+    string s;
+    SPrintf(s, "IDX: %d [X: %f  Y: %f  Z: %f]", r.InstanceIndex, r.mPos.x, r.mPos.y, r.mPos.z);
+    return s;
+};
+
+//------------------------------------------------
+// Parse BKIPR or IPR
+//------------------------------------------------
+Header  header<name="Header",bgcolor=0x0000ff>;
+FSeek(header.InstancePlacementOffset);
+rInstancePlacement placement(header.InstancePlacementCount);
+if (header.FileType == "bipr"){
+    FSeek(header.InstancePlacementXMLOffset);
+    rInstancePlacementXML xml_placement(header.InstancePlacementXMLCount);
+}
