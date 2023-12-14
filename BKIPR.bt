@@ -81,7 +81,7 @@ typedef struct
     Vector3 mScale<bgcolor=0x00a5ff,read=ReadVector3,optimize=false>;
     Vector4 mQuat<bgcolor=0x00ff00,read=ReadVector4,optimize=false>;
     Vector4 mAngle<bgcolor=0x800800,read=ReadVector4,optimize=false>;
-    float UnknknownArray[4]; //hfloat UnknownArray[32];
+    float UnknknownArray[16]; //hfloat UnknownArray[32];
     int32 unkn0;
     int32 unkn1;
     uint16 InstanceIndex;
