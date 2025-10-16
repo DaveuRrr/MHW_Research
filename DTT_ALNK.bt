@@ -1,0 +1,166 @@
+//------------------------------------------------
+//--- 010 Editor v12.0beta1 Binary Template
+//
+//      File: 
+//   Authors: Dave uRrr, Nekotaga (Structure), Ando (DTI Info)
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.dtt_alnk
+//  ID Bytes: 
+//   History: 
+//      September 21st, 2021
+//          -- Repurpose Nekotaga's structer and give it proper names based of the DTI information
+//------------------------------------------------
+
+
+//------------------------------------------------
+// Header
+//------------------------------------------------
+typedef struct {
+    uint32  Slugger;
+    uint32  FileType;
+    uint32  MonsterID;
+    uint32  Version;
+} Header;
+
+
+//------------------------------------------------
+// nEmDtTune::cAreaMoveValue           0x143395560
+//------------------------------------------------
+typedef struct {
+    float unkn[6]<optimize=false>;
+} cAreaMoveValue;
+
+
+//------------------------------------------------
+// nEmDtTune::cAreaData                0x1433955A0
+//------------------------------------------------
+typedef struct {
+    uint32 areaID;
+    uint32 RNG; // Floats are % Probability...
+} cAreaData;
+
+
+//------------------------------------------------
+// nEmDtTune::cAreaLinkStage::cQuestNo 0x1433956A0
+//------------------------------------------------
+typedef struct {
+    int32   questID;
+    int32   hrArea;     // 0 Beginning 1 First Area 2 Half Open
+    uint32  glArea;     // 0 Forest 1 Wildspire 2 Coral 3 Vale 4 Elder 5 Tundra
+    uint32  unkn;
+} cQuestNo;
+
+
+//------------------------------------------------
+// nEmDtTune::cAreaLinkData            0x1433955E0
+//------------------------------------------------
+typedef struct {
+    int32   areaID;
+    uint32  AD<bgcolor=0x0000FF>;           // Count
+    cAreaData AreaData[AD]<bgcolor=0xAA00AA,read=ReadAreaData,optimize=false>;
+} cAreaLinkData;
+
+
+//------------------------------------------------
+// nEmDtTune::cAreaLinkDataSet         0x143395620
+//------------------------------------------------
+typedef struct {
+    uint32  areaID;
+    uint32  NULL0;
+    float   mAttackAuthTimer; // mAddAngrtTimer
+    ubyte   mDisableTimer;
+    ubyte   unknFlag;
+    uint32  ALD<bgcolor=0x0000FF>;          // Count
+    cAreaLinkData AreaLinkData[ALD]<bgcolor=0x00AA00,read=ReadAreaLinkData,optimize=false>;
+    ubyte   NULL[3];
+} cAreaLinkDataSet;
+
+
+//------------------------------------------------
+// nEmDtTune::cAreaLinkStage           0x1433956E0
+//------------------------------------------------
+typedef struct {
+    uint32      mapID;
+    uint32      ALDS;
+    cAreaLinkDataSet AreaLinkDataSet[ALDS]<bgcolor=0xFF0000,read=ReadAreaLinkDataSet,optimize=false>;
+    uint32      QN<bgcolor=0x0000FF>;       // Count
+    cQuestNo    QuestNo[QN]<optimize=false>;
+    uint32      unkn;
+} cAreaLinkStage;
+
+
+//------------------------------------------------
+// nEmDtTune::cAreaLinkQuest           0x143395720
+//------------------------------------------------
+typedef struct {
+    uint32  mapID;
+    uint32  ALS<bgcolor=0x0000FF>;          // Count
+    cAreaLinkStage  AreaLinkStage[ALS]<bgcolor=0xAA0000,optimize=false>;
+} cAreaLinkQuest;
+
+
+//------------------------------------------------
+// rEmAreaLink :: rEmDtTuneChildBase   0x14343A1B0
+//------------------------------------------------
+typedef struct {
+    cAreaMoveValue  AreaMoveValues<bgcolor=0x00FF00>;
+    uint32          ALQ<bgcolor=0x0000FF>;  // Count
+    cAreaLinkQuest  AreaLinkQuest[ALQ]<bgcolor=0x800080,read=ReadAreaLinkQuest,optimize=false>;
+} rEmAreaLinker;
+
+//------------------------------------------------
+// Strings
+//------------------------------------------------
+string ReadAreaLinkQuest(cAreaLinkQuest& r) {
+    string s;
+    switch (r.mapID) {
+        case 101: SPrintf(s, "%d \t Ancient Forest      ", r.mapID); break;
+        case 102: SPrintf(s, "%d \t Wildspire Waste     ", r.mapID); break;
+        case 103: SPrintf(s, "%d \t Coral Highlands     ", r.mapID); break;
+        case 104: SPrintf(s, "%d \t Rotten Vale         ", r.mapID); break;
+        case 105: SPrintf(s, "%d \t Elders Recess       ", r.mapID); break;
+        case 106: SPrintf(s, "%d \t Great Ravine        ", r.mapID); break;
+        case 108: SPrintf(s, "%d \t Hoarfrost Reach     ", r.mapID); break;
+        case 109: SPrintf(s, "%d \t Guiding Lands       ", r.mapID); break;
+        case 201: SPrintf(s, "%d \t Arena               ", r.mapID); break;
+        case 202: SPrintf(s, "%d \t Special Arena       ", r.mapID); break;
+        case 203: Sprintf(s, "%d \t Seliana Supply Cache", r.mapID); break;
+        case 401: SPrintf(s, "%d \t AF Flooded Zora     ", r.mapID); break;
+        case 403: SPrintf(s, "%d \t Everstream          ", r.mapID); break;
+        case 405: SPrintf(s, "%d \t Confluence of Fates ", r.mapID); break;
+        case 409: SPrintf(s, "%d \t Caverns of El Dorado", r.mapID); break;
+        case 411: SPrintf(s, "%d \t Seliana Supply Cache", r.mapID); break;
+        case 412: SPrintf(s, "%d \t Origin Isle Nergi V ", r.mapID); break;
+        case 413: SPrintf(s, "%d \t Origin Isle Shara V ", r.mapID); break;
+        case 415: SPrintf(s, "%d \t Secluded Valley     ", r.mapID); break;
+        case 416: SPrintf(s, "%d \t Secluded Valley Ala ", r.mapID); break;
+        case 417: SPrintf(s, "%d \t Castle Schrade      ", r.mapID); break;
+        default: SPrintf(s, "%d \t Unknown              ", r.mapID); break;
+    }
+    return s;
+};
+
+string ReadAreaLinkDataSet(cAreaLinkDataSet& r) {
+    string s;
+    SPrintf(s, "ID: %d \t Timer: %d \t count: %d", r.areaID, r.mAttackAuthTimer, r.ALD);
+    return s;
+}
+
+string ReadAreaLinkData(cAreaLinkData& r) {
+    string s;
+    SPrintf(s, "ID: %d \t count: %d", r.areaID, r.AD);
+    return s;
+}
+
+string ReadAreaData(cAreaData& r){
+    string s;
+    SPrintf(s, "ID: %d \t Int Chance %d", r.areaID, r.RNG);
+    return s;
+}
+//------------------------------------------------
+// Display Data
+//------------------------------------------------
+Header          header<bgcolor=0x00ffff,name="nEmDtTune">;
+rEmAreaLinker   AreaLinker;
